@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Peta Satelit Ponorogo</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div id="btn-login-container">
+    <button id="btn-login" class="btn-top-right"><img src="icons/log-in.svg" alt="Login"
+        style="width: 16px; vertical-align: middle; filter: invert(0.9);" /> Login</button>
+    <button id="btn-user-toggle" class="btn-top-right"
+      style="display: none; display: inline-flex; align-items: center; gap: 6px;">
+      <img src="icons/user-round-check.svg" alt="User" style="width: 16px; height: 16px; filter: invert(0.9);" />
+      <span id="username-display">Admin</span>
+      <img src="icons/chevron-down.svg" alt="Chevron"
+        style="width: 12px; height: 12px; filter: invert(0.7); margin-left: 2px;" />
+    </button>
+    <div id="user-dropdown" class="user-dropdown" style="display: none;">
+      <div class="dropdown-item" id="dropdown-username">
+        <img src="icons/user-round-check.svg" alt="User" style="width: 16px; height: 16px; filter: invert(0.7);" />
+        <span id="dropdown-username-text">Admin</span>
+      </div>
+      <div class="dropdown-divider"></div>
+      <button id="dropdown-setting" class="dropdown-item">
+        <img src="icons/settings.svg" alt="Setting" style="width: 16px; height: 16px; filter: invert(0.7);" />
+        Setting
+      </button>
+      <button id="dropdown-logout" class="dropdown-item">
+        <img src="icons/log-out.svg" alt="Logout" style="width: 16px; height: 16px; filter: invert(0.7);" />
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Login -->
+  <div id="login-modal" class="login-modal" style="display: none">
+    <div class="login-modal-content">
+      <span class="close-btn" id="close-login-modal">&times;</span>
+      <h3>Login Admin</h3>
+      <form id="login-form">
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" required placeholder="Username" />
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Password" />
+        </div>
+        <div id="login-error" class="login-error"></div>
+        <button type="submit" class="submit-btn">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Tambah Pin -->
+  <div id="pin-modal" class="login-modal" style="display: none;">
+    <div class="login-modal-content">
+      <span class="close-btn" id="close-pin-modal">&times;</span>
+      <h3 id="pin-modal-title">Tambahkan Pin</h3>
+      <div id="pin-type-grid" class="pin-type-grid">
+        <button class="pin-type-btn" data-type="odc">
+          <img src="icons/odc.svg" alt="ODC" style="width: 28px; height: 28px; filter: invert(0.85);" />
+          <span>ODC</span>
+        </button>
+        <button class="pin-type-btn" data-type="odp-tanam">
+          <img src="icons/odp-tanam.svg" alt="ODP Tanam" style="width: 28px; height: 28px; filter: invert(0.85);" />
+          <span>ODP Tanam</span>
+        </button>
+        <button class="pin-type-btn" data-type="odp-tiang">
+          <img src="icons/odp-tiang.svg" alt="ODP Tiang" style="width: 28px; height: 28px; filter: invert(0.85);" />
+          <span>ODP Tiang</span>
+        </button>
+        <button class="pin-type-btn" data-type="klien-aktif">
+          <img src="icons/klien-aktif.svg" alt="Klien Aktif" style="width: 28px; height: 28px; filter: invert(0.85);" />
+          <span>Klien Aktif</span>
+        </button>
+        <button class="pin-type-btn" data-type="klien-nonaktif">
+          <img src="icons/klien-nonaktif.svg" alt="Klien Nonaktif" style="width: 28px; height: 28px; filter: invert(0.85);" />
+          <span>Klien Nonaktif</span>
+        </button>
+        <button class="pin-type-btn" data-type="klien-pending">
+          <img src="icons/klien-pending.svg" alt="Klien Pending" style="width: 28px; height: 28px; filter: invert(0.85);" />
+          <span>Klien Pending</span>
+        </button>
+      </div>
+      <div id="pin-form-section" style="display: none;">
+        <div class="dropdown-divider" style="margin: 16px 0;"></div>
+        <p style="font-size: 12px; color: var(--sb-text-secondary); margin-bottom: 12px;">
+          Koordinat: <strong id="pin-coord-display" style="color: var(--sb-accent);"></strong>
+        </p>
+        <form id="pin-form">
+          <div class="input-group">
+            <label for="pin-name">Nama</label>
+            <input type="text" id="pin-name" required placeholder="Nama lokasi..." />
+          </div>
+          <div class="input-group">
+            <label for="pin-keterangan">Keterangan</label>
+            <input type="text" id="pin-keterangan" placeholder="Keterangan tambahan (opsional)" />
+          </div>
+          <div id="pin-form-error" class="login-error" style="display:none;"></div>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <button type="button" id="btn-pin-back" class="submit-btn" style="background: var(--sb-bg-hover); color: var(--sb-text-secondary); border: 1px solid var(--sb-border);">Kembali</button>
+            <button type="submit" class="submit-btn">Simpan Pin</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="measure-control">
+    <button id="btn-measure">
+      <img src="icons/ruler-dimension-line.svg" alt="Ukur"
+        style="width: 16px; vertical-align: middle; filter: invert(0.9)" />
+      Ukur Jarak
+    </button>
+    <span id="measure-result" style="display: none">0 m</span>
+    <button id="btn-undo-measure" style="display: none" title="Hapus point terakhir">
+      <img src="icons/undo-2.svg" alt="Undo" style="width: 16px; vertical-align: middle; filter: invert(0.9)" />
+    </button>
+    <button id="btn-clear-measure" style="display: none; background: #b3432b; border-color: #8a2a18">
+      Hapus
+    </button>
+  </div>
+
+  <div id="panel">
+    <span id="badge">ONLINE</span>
+    <div class="legend">
+      <span class="swatch" style="background: #c0392b"></span>Batas Kota/Kabupaten
+    </div>
+    <div class="legend">
+      <span class="swatch" style="background: #e67e22"></span>Batas Kecamatan
+    </div>
+    <div class="legend"><span class="swatch" style="background: #2980b9"></span>Batas Desa</div>
+    <button id="btn-download">Unduh area untuk offline</button>
+    <div id="status">Memuat data…</div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/idb-keyval@6/dist/umd.js"></script>
+  <script>
+    /* ==========================================================
+ KONFIGURASI
+========================================================== */
+    const PONOROGO_BOUNDS = L.latLngBounds(L.latLng(-8.1, 111.3), L.latLng(-7.7, 111.65));
+    const PONOROGO_CENTER = [-7.967572, 111.40931];
+    const MIN_ZOOM = 10;
+    const MAX_ZOOM = 18;
+
+    const ESRI_URL =
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+    const DB_TILE_PREFIX = "ponorogo-tile:";
+
+    const GEOJSON_FILES = {
+      kota: "data-kota.geojson",
+      kecamatan: "data-kecamatan.geojson",
+      desa: "data-desa.geojson",
+      jalan: "data-jalan.geojson",
+    };
+
+    // State login global — diupdate oleh checkLoginStatus()
+    let isLoggedIn = false;
+
+    // Koordinat terakhir yang diklik (untuk modal tambah pin)
+    let pendingPinLatLng = null;
+    let pendingPinType = null;
+
+    /* ==========================================================
+ PETA
+========================================================== */
+    const map = L.map("map", {
+      center: PONOROGO_CENTER,
+      zoom: 17,
+      minZoom: MIN_ZOOM,
+      maxZoom: MAX_ZOOM,
+      zoomControl: false,
+      attributionControl: false,
+    });
+
+    // Zoom control at bottomright
+    L.control
+      .zoom({
+        position: "bottomright",
+      })
+      .addTo(map);
+
+    // Reset view control
+    L.Control.ResetView = L.Control.extend({
+      onAdd: function (map) {
+        const container = L.DomUtil.create(
+          "div",
+          "leaflet-bar leaflet-control leaflet-control-custom",
+        );
+        container.title = "Kembali ke posisi awal";
+
+        const img = document.createElement("img");
+        img.src = "icons/locate-fixed.svg";
+        container.appendChild(img);
+
+        container.onclick = function (e) {
+          e.stopPropagation();
+          map.setView(PONOROGO_CENTER, 17);
+        };
+
+        return container;
+      },
+    });
+
+    new L.Control.ResetView({ position: "bottomright" }).addTo(map);
+
+    /* ---------- tile satelit dengan cache offline (IndexedDB) ---------- */
+    function tileKey(c) {
+      return `${c.z}/${c.x}/${c.y}`;
+    }
+
+    const TileLayerOffline = L.TileLayer.extend({
+      createTile: function (coords, done) {
+        const tile = document.createElement("img");
+        const url = this.getTileUrl(coords);
+        const key = DB_TILE_PREFIX + tileKey(coords);
+        idbKeyval
+          .get(key)
+          .then((blob) => {
+            if (blob) {
+              tile.src = URL.createObjectURL(blob);
+              done(null, tile);
+            } else {
+              tile.crossOrigin = "anonymous";
+              tile.onload = () => done(null, tile);
+              tile.onerror = (e) => done(e, tile);
+              tile.src = url;
+            }
+          })
+          .catch(() => {
+            tile.crossOrigin = "anonymous";
+            tile.onload = () => done(null, tile);
+            tile.onerror = (e) => done(e, tile);
+            tile.src = url;
+          });
+        return tile;
+      },
+    });
+
+    new TileLayerOffline(ESRI_URL, { maxZoom: MAX_ZOOM, minZoom: MIN_ZOOM }).addTo(map);
+
+    // Layer groups untuk zoom-based label filtering
+    const kecamatanLabelsGroup = L.layerGroup();
+    const desaLabelsGroup = L.layerGroup();
+    const jalanLabelsGroup = L.layerGroup();
+
+    // Layer groups untuk Infrastruktur FTTH (ODC, ODP, Klien, Kabel)
+    const odcLayerGroup = L.layerGroup().addTo(map);
+    const odpLayerGroup = L.layerGroup().addTo(map);
+    const klienLayerGroup = L.layerGroup().addTo(map);
+    const kabelLayerGroup = L.layerGroup().addTo(map);
+
+    // Kustom ikon untuk masing-masing tipe pin
+    const FTTH_ICONS = {
+      'odc': L.icon({
+        iconUrl: 'icons/odc.svg',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -10]
+      }),
+      'odp-tanam': L.icon({
+        iconUrl: 'icons/odp-tanam.svg',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -10]
+      }),
+      'odp-tiang': L.icon({
+        iconUrl: 'icons/odp-tiang.svg',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -10]
+      }),
+      'klien-aktif': L.icon({
+        iconUrl: 'icons/klien-aktif.svg',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        popupAnchor: [0, -8]
+      }),
+      'klien-nonaktif': L.icon({
+        iconUrl: 'icons/klien-nonaktif.svg',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        popupAnchor: [0, -8]
+      }),
+      'klien-pending': L.icon({
+        iconUrl: 'icons/klien-pending.svg',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        popupAnchor: [0, -8]
+      })
+    };
+
+    function updateLabelsByZoom() {
+      const zoom = map.getZoom();
+      if (zoom <= 13) {
+        if (!map.hasLayer(kecamatanLabelsGroup)) {
+          kecamatanLabelsGroup.addTo(map);
+        }
+        map.removeLayer(desaLabelsGroup);
+        map.removeLayer(jalanLabelsGroup);
+      } else {
+        map.removeLayer(kecamatanLabelsGroup);
+        if (!map.hasLayer(desaLabelsGroup)) {
+          desaLabelsGroup.addTo(map);
+        }
+        if (!map.hasLayer(jalanLabelsGroup)) {
+          jalanLabelsGroup.addTo(map);
+        }
+      }
+    }
+
+    map.on("zoomend", updateLabelsByZoom);
+
+    /* ==========================================================
+ STATUS ONLINE/OFFLINE
+========================================================== */
+    const badge = document.getElementById("badge");
+    const statusEl = document.getElementById("status");
+    function updateBadge() {
+      if (navigator.onLine) {
+        badge.textContent = "ONLINE";
+        badge.classList.remove("offline");
+      } else {
+        badge.textContent = "OFFLINE";
+        badge.classList.add("offline");
+      }
+    }
+    window.addEventListener("online", updateBadge);
+    window.addEventListener("offline", updateBadge);
+    updateBadge();
+
+    /* ==========================================================
+ UNDUH TILE UNTUK OFFLINE
+========================================================== */
+    function listTilesInBounds(bounds, minZ, maxZ) {
+      const tiles = [];
+      for (let z = minZ; z <= maxZ; z++) {
+        const nw = map.project(bounds.getNorthWest(), z).divideBy(256).floor();
+        const se = map.project(bounds.getSouthEast(), z).divideBy(256).floor();
+        for (let x = nw.x; x <= se.x; x++)
+          for (let y = nw.y; y <= se.y; y++) tiles.push({ z, x, y });
+      }
+      return tiles;
+    }
+
+    document.getElementById("btn-download").addEventListener("click", async () => {
+      const tiles = listTilesInBounds(PONOROGO_BOUNDS, MIN_ZOOM, MAX_ZOOM);
+      const total = tiles.length;
+      if (
+        total > 8000 &&
+        !confirm(`Akan mengunduh ${total} tile (zoom ${MIN_ZOOM}-${MAX_ZOOM}). Lanjutkan?`)
+      )
+        return;
+
+      let done = 0,
+        failed = 0;
+      for (const t of tiles) {
+        const key = DB_TILE_PREFIX + tileKey(t);
+        try {
+          if (!(await idbKeyval.get(key))) {
+            const url = ESRI_URL.replace("{z}", t.z).replace("{x}", t.x).replace("{y}", t.y);
+            const res = await fetch(url);
+            if (res.ok) await idbKeyval.set(key, await res.blob());
+            else failed++;
+          }
+        } catch (e) {
+          failed++;
+        }
+        done++;
+        statusEl.textContent = `Mengunduh ${done}/${total} tile…`;
+      }
+      statusEl.textContent =
+        `Selesai. ${total - failed} tile tersimpan offline` +
+        (failed ? `, ${failed} gagal.` : ".");
+    });
+
+    /* ==========================================================
+ LOAD DATA GEOJSON: kota, kecamatan, desa
+ Field nama dicoba dari beberapa kemungkinan penamaan umum
+ (name, WADMKK/WADMKC/WADMKD, nmkab/nmkec/nmdesa, dst.)
+========================================================== */
+
+    /**
+     * Bangun HTML konten popup.
+     * Jika isLoggedIn=true, tambahkan tombol "Tambahkan Pin" beserta data koordinat.
+     */
+    function buildPopupHTML(title, iconSvg, subtitle, lat, lng) {
+      const pinBtn = isLoggedIn
+        ? `<button
+             class="popup-add-pin-btn"
+             data-lat="${lat}" data-lng="${lng}"
+             onclick="openPinModal(${lat}, ${lng}); this.closest('.leaflet-popup').querySelector('.leaflet-popup-close-button').click();">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;">
+               <path d="M12 5v14M5 12h14"/></svg>
+             Tambahkan Pin
+           </button>`
+        : '';
+      return (
+        `<div class="popup-title">${title}</div>` +
+        (subtitle ? `<div class="popup-coords">` +
+        `  ${iconSvg}` +
+        `  <span>${subtitle}</span>` +
+        `</div>` : '') +
+        (lat !== undefined ? `<div class="popup-coords" style="margin-top:2px;font-size:10px;opacity:0.7;"><span>${parseFloat(lat).toFixed(5)}, ${parseFloat(lng).toFixed(5)}</span></div>` : '') +
+        (pinBtn ? `<div class="popup-pin-action">${pinBtn}</div>` : '')
+      );
+    }
+
+    function pickName(props, level) {
+      if (!props) return "Tanpa nama";
+      const candidates = {
+        kota: ["nama", "name", "WADMKK", "nmkab", "NAMOBJ", "KABKOT", "kabupaten"],
+        kecamatan: ["nama", "name", "WADMKC", "nmkec", "NAMOBJ", "kecamatan"],
+        desa: ["nama", "name", "WADMKD", "nmdesa", "NAMOBJ", "desa", "DESA"],
+      }[level] || ["name"];
+      for (const key of candidates) {
+        if (props[key]) return props[key];
+      }
+      return "Tanpa nama";
+    }
+
+    const STYLES = {
+      kota: { color: "#c0392b", weight: 3, fillOpacity: 0.02 },
+      kecamatan: { color: "#e67e22", weight: 2, fillOpacity: 0.04, dashArray: "6 3" },
+      desa: { color: "#2980b9", weight: 1.2, fillOpacity: 0.05, dashArray: "2 4" },
+      jalan: { color: "#f39c12", weight: 2, opacity: 0.7 },
+    };
+
+    async function loadBoundaryLayer(level, filename) {
+      try {
+        const res = await fetch(filename);
+        if (!res.ok) throw new Error("File tidak ditemukan: " + filename);
+        const geojson = await res.json();
+
+        // Hanya tampilkan boundary untuk level kota
+        if (level === "kota") {
+          L.geoJSON(geojson, {
+            style: STYLES[level],
+            onEachFeature: (feature, layer) => {
+              if (!isLoggedIn) return; // Popup tidak muncul jika belum login
+              const name = pickName(feature.properties, level);
+              const labelLevel = { kota: "Kota/Kabupaten", kecamatan: "Kecamatan", desa: "Desa/Kelurahan" }[level];
+              const shieldSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+              layer.bindPopup(buildPopupHTML(name, shieldSvg, labelLevel));
+            },
+          }).addTo(map);
+        }
+
+        // Untuk kecamatan: tampilkan label nama saja
+        if (level === "kecamatan") {
+          for (const feature of geojson.features) {
+            const name = pickName(feature.properties, level);
+            const displayName = name.replace(/^Kecamatan\s+/, "");
+            if (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon") {
+              try {
+                const bounds = L.geoJSON(feature).getBounds();
+                const center = bounds.getCenter();
+                const lat = center.lat.toFixed(4);
+                const lng = center.lng.toFixed(4);
+                const marker = L.marker(center, {
+                  icon: L.divIcon({
+                    className: "place-label",
+                    html: displayName,
+                    iconSize: null,
+                    iconAnchor: [0, 0],
+                  }),
+                });
+                if (isLoggedIn) {
+                  const pinSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`;
+                  marker.bindPopup(buildPopupHTML(displayName, pinSvg, "Kecamatan", lat, lng));
+                }
+                marker.addTo(kecamatanLabelsGroup);
+              } catch (e) {
+                console.warn("Label gagal: " + name, e);
+              }
+            }
+          }
+        }
+
+        // Untuk desa: tampilkan boundary dan popup saat diklik
+        if (level === "desa") {
+          L.geoJSON(geojson, {
+            style: STYLES[level],
+            onEachFeature: (feature, layer) => {
+              const name = pickName(feature.properties, level);
+              layer.on("click", (e) => {
+                if (!isLoggedIn) return; // Popup tidak muncul jika belum login
+                const lat = e.latlng.lat.toFixed(5);
+                const lng = e.latlng.lng.toFixed(5);
+                const pinSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`;
+                L.popup()
+                  .setLatLng(e.latlng)
+                  .setContent(buildPopupHTML(name, pinSvg, "", lat, lng))
+                  .openOn(map);
+              });
+            },
+          }).addTo(map);
+
+          // Tambahkan label nama di tengah setiap desa
+          for (const feature of geojson.features) {
+            const name = pickName(feature.properties, level);
+            const displayName = name.replace(/^Desa\s+/, "");
+            if (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon") {
+              try {
+                const bounds = L.geoJSON(feature).getBounds();
+                const center = bounds.getCenter();
+                const lat = center.lat.toFixed(4);
+                const lng = center.lng.toFixed(4);
+                const marker = L.marker(center, {
+                  icon: L.divIcon({
+                    className: "place-label",
+                    html: displayName,
+                    iconSize: null,
+                    iconAnchor: [0, 0],
+                  }),
+                });
+                if (isLoggedIn) {
+                  const pinSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`;
+                  marker.bindPopup(buildPopupHTML(displayName, pinSvg, "Desa", lat, lng));
+                }
+                marker.addTo(desaLabelsGroup);
+              } catch (e) {
+                console.warn("Label gagal: " + name, e);
+              }
+            }
+          }
+        }
+
+        return (geojson.features || []).length;
+      } catch (err) {
+        console.warn(`Gagal memuat ${filename}:`, err.message);
+        return 0;
+      }
+    }
+
+    async function loadInfrastruktur() {
+      try {
+        // Bersihkan layer-layer sebelumnya
+        odcLayerGroup.clearLayers();
+        odpLayerGroup.clearLayers();
+        klienLayerGroup.clearLayers();
+        kabelLayerGroup.clearLayers();
+
+        // 1. Ambil & Gambar Kabel
+        const resKabel = await fetch("/api/kabel");
+        if (resKabel.ok) {
+          const kabelData = await resKabel.json();
+          kabelData.forEach((kabel) => {
+            if (kabel.geometry && kabel.geometry.coordinates) {
+              // Convert GeoJSON coordinates [lng, lat] to Leaflet LatLng [lat, lng]
+              const latlngs = kabel.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+              
+              let style = { color: "#3b82f6", weight: 3, opacity: 0.8 }; // Default distribusi (biru)
+              if (kabel.jenis === "feeder") {
+                style = { color: "#10b981", weight: 4.5, opacity: 0.9 }; // Feeder (hijau)
+              } else if (kabel.jenis === "drop") {
+                style = { color: "#f59e0b", weight: 2, opacity: 0.8, dashArray: "5, 5" }; // Drop (kuning putus-putus)
+              }
+
+              const polyline = L.polyline(latlngs, style).addTo(kabelLayerGroup);
+              
+              const jenisLabel = { feeder: "Kabel Feeder", distribusi: "Kabel Distribusi", drop: "Kabel Drop" }[kabel.jenis] || "Kabel";
+              const popupContent = `
+                <div class="popup-title" style="color: ${style.color};">${jenisLabel}</div>
+                <div class="popup-coords" style="font-weight: 500;">Koneksi: ${kabel.dari_tipe.toUpperCase()} #${kabel.dari_id} ➔ ${kabel.ke_tipe.toUpperCase()} #${kabel.ke_id}</div>
+                <div class="popup-coords">Jumlah Core: ${kabel.jumlah_core || "-"} Core</div>
+                <div class="popup-coords" style="margin-top: 4px; border-top: 1px solid var(--sb-border); padding-top: 4px; font-variant-numeric: tabular-nums;">
+                  Panjang: <strong>${kabel.panjang_meter ? Math.round(kabel.panjang_meter) + " m" : "-"}</strong>
+                </div>
+              `;
+              polyline.bindPopup(popupContent);
+            }
+          });
+        }
+
+        // 2. Ambil & Gambar ODC
+        const resOdc = await fetch("/api/odc");
+        if (resOdc.ok) {
+          const odcData = await resOdc.json();
+          odcData.forEach((odc) => {
+            if (odc.lat && odc.lng) {
+              const marker = L.marker([odc.lat, odc.lng], { icon: FTTH_ICONS["odc"] }).addTo(odcLayerGroup);
+              const popupContent = `
+                <div class="popup-title">${odc.nama}</div>
+                <div class="popup-coords" style="color: var(--sb-accent); font-weight: 600;">ODC (Optical Distribution Cabinet)</div>
+                <div class="popup-coords">Kapasitas: ${odc.kapasitas_port || 0} Port</div>
+                ${odc.catatan ? `<div class="popup-coords" style="margin-top:6px; font-style:italic; color: var(--sb-text-secondary); max-width: 180px;">"${odc.catatan}"</div>` : ""}
+                <div class="popup-coords" style="margin-top:4px; font-size:10px; opacity:0.7;"><span>${odc.lat.toFixed(5)}, ${odc.lng.toFixed(5)}</span></div>
+              `;
+              marker.bindPopup(popupContent);
+              marker.bindTooltip(odc.nama, {
+                permanent: true,
+                direction: "right",
+                offset: [12, 0],
+                className: "device-label"
+              });
+            }
+          });
+        }
+
+        // 3. Ambil & Gambar ODP
+        const resOdp = await fetch("/api/odp");
+        if (resOdp.ok) {
+          const odpData = await resOdp.json();
+          odpData.forEach((odp) => {
+            if (odp.lat && odp.lng) {
+              const iconKey = odp.tipe_pemasangan === "tanam" ? "odp-tanam" : "odp-tiang";
+              const marker = L.marker([odp.lat, odp.lng], { icon: FTTH_ICONS[iconKey] }).addTo(odpLayerGroup);
+              const installLabel = odp.tipe_pemasangan === "tanam" ? "Tanam (Pedestal)" : "Tiang (Pole)";
+              const popupContent = `
+                <div class="popup-title">${odp.nama}</div>
+                <div class="popup-coords" style="color: var(--sb-accent); font-weight: 600;">ODP (${installLabel})</div>
+                <div class="popup-coords">Kapasitas: ${odp.kapasitas_port || 8} Port</div>
+                <div class="popup-coords" style="font-variant-numeric: tabular-nums;">Terpakai: <strong>${odp.port_terpakai || 0}</strong> / ${odp.kapasitas_port || 8} Port</div>
+                ${odp.catatan ? `<div class="popup-coords" style="margin-top:6px; font-style:italic; color: var(--sb-text-secondary); max-width: 180px;">"${odp.catatan}"</div>` : ""}
+                <div class="popup-coords" style="margin-top:4px; font-size:10px; opacity:0.7;"><span>${odp.lat.toFixed(5)}, ${odp.lng.toFixed(5)}</span></div>
+              `;
+              marker.bindPopup(popupContent);
+              marker.bindTooltip(odp.nama, {
+                permanent: true,
+                direction: "right",
+                offset: [12, 0],
+                className: "device-label"
+              });
+            }
+          });
+        }
+
+        // 4. Ambil & Gambar Klien
+        const resKlien = await fetch("/api/klien");
+        if (resKlien.ok) {
+          const klienData = await resKlien.json();
+          klienData.forEach((klien) => {
+            if (klien.lat && klien.lng) {
+              const iconKey = `klien-${klien.status || "pending"}`;
+              const marker = L.marker([klien.lat, klien.lng], { icon: FTTH_ICONS[iconKey] }).addTo(klienLayerGroup);
+              
+              const statusColors = { aktif: "#10b981", nonaktif: "#ef4444", pending: "#f59e0b" };
+              const statusLabel = { aktif: "Aktif", nonaktif: "Nonaktif", pending: "Pending" }[klien.status] || "Pending";
+              
+              const popupContent = `
+                <div class="popup-title">${klien.nama}</div>
+                <div class="popup-coords" style="color: ${statusColors[klien.status] || "#f59e0b"}; font-weight: 600;">Klien (${statusLabel})</div>
+                ${klien.alamat ? `<div class="popup-coords" style="color: var(--sb-text-secondary); margin-bottom: 2px;">Alamat: ${klien.alamat}</div>` : ""}
+                ${klien.nama_odp ? `<div class="popup-coords" style="border-top: 1px solid var(--sb-border); margin-top: 4px; padding-top: 4px;">ODP: <strong>${klien.nama_odp}</strong> (Port #${klien.nomor_port || "-"})</div>` : ""}
+                <div class="popup-coords" style="margin-top:4px; font-size:10px; opacity:0.7;"><span>${klien.lat.toFixed(5)}, ${klien.lng.toFixed(5)}</span></div>
+              `;
+              marker.bindPopup(popupContent);
+              marker.bindTooltip(klien.nama, {
+                permanent: true,
+                direction: "right",
+                offset: [10, 0],
+                className: "device-label"
+              });
+            }
+          });
+        }
+
+      } catch (err) {
+        console.error("Gagal memuat data infrastruktur:", err);
+      }
+    }
+
+    async function loadRoadsLayer(filename) {
+      // Pemuatan nama jalan dinonaktifkan atas permintaan user
+      return 0;
+    }
+
+    (async function initData() {
+      const results = await Promise.all([
+        loadBoundaryLayer("kota", GEOJSON_FILES.kota),
+        loadBoundaryLayer("kecamatan", GEOJSON_FILES.kecamatan),
+        loadBoundaryLayer("desa", GEOJSON_FILES.desa),
+        loadRoadsLayer(GEOJSON_FILES.jalan),
+      ]);
+      const [kota, kecamatan, desa, jalan] = results;
+      if (kota + kecamatan + desa === 0) {
+        statusEl.textContent =
+          "Data GeoJSON tidak ditemukan. Pastikan file data-kota.geojson, data-kecamatan.geojson, data-desa.geojson berada satu folder dengan file HTML ini dan dibuka lewat server lokal (bukan double-click file).";
+      } else {
+        statusEl.textContent = `Dimuat: ${kota} kota, ${kecamatan} kecamatan, ${desa} desa.`;
+      }
+      updateLabelsByZoom();
+      
+      // Load data infrastruktur FTTH
+      await loadInfrastruktur();
+    })();
+
+    /* ==========================================================
+ FITUR PENGUKURAN JARAK (PEN TOOL)
+========================================================== */
+    let isMeasuring = false;
+    let measurePoints = [];
+    let measurePolyline = null;
+    let tempPolyline = null;
+    let measureMarkers = [];
+
+    const btnMeasure = document.getElementById("btn-measure");
+    const btnClearMeasure = document.getElementById("btn-clear-measure");
+    const btnUndoMeasure = document.getElementById("btn-undo-measure");
+    const measureResult = document.getElementById("measure-result");
+
+    btnMeasure.addEventListener("click", () => {
+      if (!isMeasuring) {
+        startMeasuring();
+      } else {
+        stopMeasuring();
+      }
+    });
+
+    btnClearMeasure.addEventListener("click", clearMeasurement);
+
+    btnUndoMeasure.addEventListener("click", undoLastPoint);
+
+    function startMeasuring() {
+      isMeasuring = true;
+      map.doubleClickZoom.disable();
+      btnMeasure.innerHTML = '<img src="icons/ruler-dimension-line.svg" alt="Selesai" style="width: 16px; vertical-align: middle; filter: invert(0.9);"/> Selesai';
+      btnMeasure.style.background = "#b3432b";
+      btnMeasure.style.borderColor = "#8a2a18";
+      btnClearMeasure.style.display = "none";
+      btnUndoMeasure.style.display = "none";
+      measureResult.style.display = "inline";
+      measureResult.textContent = "Klik peta untuk menggambar garis...";
+
+      map.getContainer().style.cursor = "crosshair";
+      // Tutup semua popup yang sedang terbuka dan nonaktifkan klik popup
+      map.closePopup();
+      map.eachLayer((layer) => {
+        if (layer.getPopup) {
+          layer.unbindPopup && (layer._measurePopupDisabled = true);
+        }
+      });
+      clearMeasurement();
+
+      map.on("click", onMapClickForMeasure);
+      map.on("mousemove", onMapMouseMoveForMeasure);
+    }
+
+    function stopMeasuring() {
+      isMeasuring = false;
+      map.doubleClickZoom.enable();
+      btnMeasure.innerHTML = '<img src="icons/ruler-dimension-line.svg" alt="Ukur" style="width: 16px; vertical-align: middle; filter: invert(0.9);"/> Ukur Jarak';
+      btnMeasure.style.background = "#2a2e31";
+      btnMeasure.style.borderColor = "#444";
+      btnUndoMeasure.style.display = "none";
+      if (measurePoints.length > 0) {
+        btnClearMeasure.style.display = "inline";
+      }
+      map.getContainer().style.cursor = "";
+
+      if (tempPolyline) {
+        map.removeLayer(tempPolyline);
+        tempPolyline = null;
+      }
+
+      map.off("click", onMapClickForMeasure);
+      map.off("mousemove", onMapMouseMoveForMeasure);
+    }
+
+    function clearMeasurement() {
+      measurePoints = [];
+      if (measurePolyline) {
+        map.removeLayer(measurePolyline);
+        measurePolyline = null;
+      }
+      if (tempPolyline) {
+        map.removeLayer(tempPolyline);
+        tempPolyline = null;
+      }
+      measureMarkers.forEach((m) => map.removeLayer(m));
+      measureMarkers = [];
+      measureResult.textContent = "0 m";
+      measureResult.style.display = "none";
+      btnClearMeasure.style.display = "none";
+      btnUndoMeasure.style.display = "none";
+    }
+
+    function undoLastPoint() {
+      if (measurePoints.length === 0) return;
+
+      measurePoints.pop();
+      if (measureMarkers.length > 0) {
+        const lastMarker = measureMarkers.pop();
+        map.removeLayer(lastMarker);
+      }
+
+      if (measurePoints.length === 0) {
+        if (measurePolyline) {
+          map.removeLayer(measurePolyline);
+          measurePolyline = null;
+        }
+        measureResult.textContent = "0 m";
+        btnUndoMeasure.style.display = "none";
+        btnClearMeasure.style.display = "none";
+      } else {
+        measurePolyline.setLatLngs(measurePoints);
+        const totalDist = calculateTotalDistance();
+        measureResult.textContent = `Jarak: ${formatDistance(totalDist)}`;
+        measurePolyline.setTooltipContent(`Total: ${formatDistance(totalDist)}`);
+      }
+    }
+
+    function formatDistance(meters) {
+      const rounded = Math.round(meters);
+      const formatted = new Intl.NumberFormat("id-ID").format(rounded);
+      return formatted + " m";
+    }
+
+    function calculateTotalDistance() {
+      let total = 0;
+      for (let i = 0; i < measurePoints.length - 1; i++) {
+        total += measurePoints[i].distanceTo(measurePoints[i + 1]);
+      }
+      return total;
+    }
+
+    function onMapClickForMeasure(e) {
+      // Cegah popup terbuka saat mode pengukuran aktif
+      map.closePopup();
+      if (e.originalEvent) {
+        e.originalEvent.stopPropagation();
+      }
+
+      const latlng = e.latlng;
+      measurePoints.push(latlng);
+
+      const marker = L.circleMarker(latlng, {
+        radius: 5,
+        color: "#f39c12",
+        fillColor: "#fff",
+        fillOpacity: 1,
+        weight: 2,
+      }).addTo(map);
+      measureMarkers.push(marker);
+
+      if (measurePoints.length === 1) {
+        btnUndoMeasure.style.display = "inline";
+      }
+
+      if (!measurePolyline) {
+        measurePolyline = L.polyline(measurePoints, {
+          color: "#f39c12",
+          weight: 4,
+          opacity: 0.9,
+        }).addTo(map);
+      } else {
+        measurePolyline.setLatLngs(measurePoints);
+      }
+
+      const totalDist = calculateTotalDistance();
+      measureResult.textContent = `Jarak: ${formatDistance(totalDist)}`;
+
+      measurePolyline
+        .bindTooltip(`Total: ${formatDistance(totalDist)}`, {
+          permanent: true,
+          direction: "top",
+          className: "road-label",
+        })
+        .openTooltip();
+    }
+
+    function onMapMouseMoveForMeasure(e) {
+      if (measurePoints.length === 0) return;
+
+      const lastPoint = measurePoints[measurePoints.length - 1];
+      const currentPoint = e.latlng;
+
+      if (!tempPolyline) {
+        tempPolyline = L.polyline([lastPoint, currentPoint], {
+          color: "#f39c12",
+          weight: 3,
+          opacity: 0.5,
+          dashArray: "5, 5",
+        }).addTo(map);
+      } else {
+        tempPolyline.setLatLngs([lastPoint, currentPoint]);
+      }
+
+      const currentSegmentDist = lastPoint.distanceTo(currentPoint);
+      const totalDist = calculateTotalDistance() + currentSegmentDist;
+      measureResult.textContent = `Jarak: ${formatDistance(totalDist)}`;
+    }
+
+    /* ==========================================================
+       LOGIN / LOGOUT MODAL CONTROLLER
+    ========================================================== */
+    const btnLogin = document.getElementById("btn-login");
+    const btnUserToggle = document.getElementById("btn-user-toggle");
+    const userDropdown = document.getElementById("user-dropdown");
+    const usernameDisplay = document.getElementById("username-display");
+    const dropdownUsernameText = document.getElementById("dropdown-username-text");
+    const dropdownSetting = document.getElementById("dropdown-setting");
+    const dropdownLogout = document.getElementById("dropdown-logout");
+    const loginModal = document.getElementById("login-modal");
+    const closeLoginModal = document.getElementById("close-login-modal");
+    const loginForm = document.getElementById("login-form");
+    const loginError = document.getElementById("login-error");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+
+    async function checkLoginStatus() {
+      try {
+        const res = await fetch("/api/me");
+        const data = await res.json();
+        if (data.loggedIn) {
+          isLoggedIn = true;
+          btnLogin.style.display = "none";
+          btnUserToggle.style.display = "flex";
+          usernameDisplay.textContent = data.username;
+          dropdownUsernameText.textContent = data.username;
+          userDropdown.style.display = "none";
+        } else {
+          isLoggedIn = false;
+          btnLogin.style.display = "block";
+          btnUserToggle.style.display = "none";
+          userDropdown.style.display = "none";
+        }
+      } catch (e) {
+        console.error("Gagal memeriksa status login", e);
+        isLoggedIn = false;
+        btnLogin.style.display = "block";
+        btnUserToggle.style.display = "none";
+        userDropdown.style.display = "none";
+      }
+    }
+
+    btnLogin.addEventListener("click", () => {
+      loginModal.style.display = "flex";
+      usernameInput.value = "";
+      passwordInput.value = "";
+      loginError.style.display = "none";
+      usernameInput.focus();
+    });
+
+    btnUserToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      userDropdown.style.display = userDropdown.style.display === "none" ? "block" : "none";
+    });
+
+    userDropdown.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
+    dropdownLogout.addEventListener("click", async () => {
+      if (confirm("Apakah Anda yakin ingin logout?")) {
+        try {
+          const res = await fetch("/api/logout", { method: "POST" });
+          if (res.ok) {
+            alert("Logout berhasil!");
+            checkLoginStatus();
+            location.reload();
+          }
+        } catch (e) {
+          alert("Gagal melakukan logout.");
+        }
+      }
+    });
+
+    dropdownSetting.addEventListener("click", () => {
+      alert("Fitur setting belum tersedia");
+    });
+
+    document.addEventListener("click", () => {
+      userDropdown.style.display = "none";
+    });
+
+    closeLoginModal.addEventListener("click", () => {
+      loginModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === loginModal) {
+        loginModal.style.display = "none";
+      }
+    });
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginError.style.display = "none";
+      const username = usernameInput.value;
+      const password = passwordInput.value;
+
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          loginModal.style.display = "none";
+          alert("Login berhasil!");
+          checkLoginStatus();
+          // Reload halaman untuk memuat control panel edit jika ada
+          location.reload();
+        } else {
+          loginError.textContent = data.error || "Username atau password salah.";
+          loginError.style.display = "block";
+        }
+      } catch (err) {
+        loginError.textContent = "Gagal menghubungi server.";
+        loginError.style.display = "block";
+      }
+    });
+
+    // Jalankan cek login saat start
+    checkLoginStatus();
+
+    /* ==========================================================
+       PIN MODAL CONTROLLER
+    ========================================================== */
+    const pinModal = document.getElementById("pin-modal");
+    const closePinModal = document.getElementById("close-pin-modal");
+    const pinTypeGrid = document.getElementById("pin-type-grid");
+    const pinFormSection = document.getElementById("pin-form-section");
+    const pinModalTitle = document.getElementById("pin-modal-title");
+    const pinCoordDisplay = document.getElementById("pin-coord-display");
+    const pinForm = document.getElementById("pin-form");
+    const pinNameInput = document.getElementById("pin-name");
+    const pinKeteranganInput = document.getElementById("pin-keterangan");
+    const pinFormError = document.getElementById("pin-form-error");
+    const btnPinBack = document.getElementById("btn-pin-back");
+
+    // Fungsi global dipanggil dari onclick di dalam popup HTML string
+    window.openPinModal = function(lat, lng) {
+      if (!isLoggedIn) return;
+      pendingPinLatLng = { lat, lng };
+      pendingPinType = null;
+      pinModalTitle.textContent = "Tambahkan Pin";
+      pinTypeGrid.style.display = "grid";
+      pinFormSection.style.display = "none";
+      pinForm.reset();
+      pinFormError.style.display = "none";
+      // Reset active state
+      document.querySelectorAll(".pin-type-btn").forEach(b => b.classList.remove("active"));
+      pinModal.style.display = "flex";
+    };
+
+    // Pilih tipe pin
+    document.querySelectorAll(".pin-type-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        pendingPinType = btn.dataset.type;
+        const label = btn.querySelector("span").textContent;
+        pinModalTitle.textContent = `Tambah ${label}`;
+        pinCoordDisplay.textContent = `${pendingPinLatLng.lat.toFixed(6)}, ${pendingPinLatLng.lng.toFixed(6)}`;
+        pinTypeGrid.style.display = "none";
+        pinFormSection.style.display = "block";
+        pinNameInput.focus();
+      });
+    });
+
+    // Tombol kembali ke pilih tipe
+    btnPinBack.addEventListener("click", () => {
+      pinModalTitle.textContent = "Tambahkan Pin";
+      pinTypeGrid.style.display = "grid";
+      pinFormSection.style.display = "none";
+      pendingPinType = null;
+    });
+
+    // Tutup modal
+    closePinModal.addEventListener("click", () => { pinModal.style.display = "none"; });
+    window.addEventListener("click", (e) => { if (e.target === pinModal) pinModal.style.display = "none"; });
+
+    // Submit form pin
+    pinForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      pinFormError.style.display = "none";
+      if (!pendingPinLatLng || !pendingPinType) return;
+
+      const payload = {
+        type: pendingPinType,
+        name: pinNameInput.value.trim(),
+        keterangan: pinKeteranganInput.value.trim(),
+        lat: pendingPinLatLng.lat,
+        lng: pendingPinLatLng.lng,
+      };
+
+      try {
+        const res = await fetch("/api/pins", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          pinModal.style.display = "none";
+          alert(`Pin "${payload.name}" berhasil disimpan!`);
+          // Muat ulang data infrastruktur ke peta secara real-time
+          await loadInfrastruktur();
+        } else {
+          pinFormError.textContent = data.error || "Gagal menyimpan pin.";
+          pinFormError.style.display = "block";
+        }
+      } catch (err) {
+        pinFormError.textContent = "Gagal menghubungi server.";
+        pinFormError.style.display = "block";
+      }
+    });
+
+    map.on("dblclick", () => {
+      if (isMeasuring) {
+        stopMeasuring();
+      }
+    });
+
+    // Shortcut Ctrl+Z untuk undo titik ukur (hanya saat mode pengukuran aktif)
+    document.addEventListener("keydown", (e) => {
+      if (e.ctrlKey && e.key === "z" && isMeasuring) {
+        e.preventDefault();
+        undoLastPoint();
+      }
+    });
+  </script>
+</body>
+
+</html>
