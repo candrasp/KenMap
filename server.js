@@ -36,7 +36,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.use(session({
-  secret: 'VFIsFKQCw1JDKsoG7DlT2vJJggYM1PurdoAG2rqn4i4=', // WAJIB diganti sebelum dipakai sungguhan
+  secret: process.env.SESSION_SECRET || 'VFIsFKQCw1JDKsoG7DlT2vJJggYM1PurdoAG2rqn4i4=',
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 1000 * 60 * 60 * 8 } // sesi login bertahan 8 jam

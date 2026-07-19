@@ -48,9 +48,13 @@ tmp/
 temp/
 *.tmp
 
+# Documentation & Project Files
 GEMINI.md
 CLAUDE.md
+DESAIN.md
 data/
 scratch/
+
+
 
 

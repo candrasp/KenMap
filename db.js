@@ -5,7 +5,8 @@
 const Database = require("better-sqlite3");
 const path = require("path");
 
-const db = new Database(path.join(__dirname, "ftth.db"));
+const dbPath = process.env.DB_PATH || path.join(__dirname, "ftth.db");
+const db = new Database(dbPath);
 
 // WAL mode: read tetap lancar walau ada proses write berjalan.
 // Penting untuk skenario 5 admin mengakses bersamaan.
