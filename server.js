@@ -10,21 +10,30 @@ const { exec } = require('child_process');
 const db = require('./db'); // otomatis membuat tabel kalau belum ada
 
 const authRoutes = require('./routes/auth');
+const stoRoutes = require('./routes/sto');
 const odcRoutes = require('./routes/odc');
+const oltRoutes = require('./routes/olt');
 const odpRoutes = require('./routes/odp');
 const kabelRoutes = require('./routes/kabel');
 const klienRoutes = require('./routes/klien');
 const pinsRoutes = require('./routes/pins');
 
+const path = require('path');
+
 const app = express();
 const PORT = 3000;
-const HOST = '0.0.0.0'; // Dengarkan semua interface agar bisa diakses perangkat lain di jaringan yang sama
+const HOST = '0.0.0.0';
 
 app.use(express.json());
 
-// Sajikan semua file di folder public/ (index.html, geojson, ikon, dst)
-// Ini menggantikan seluruh logika manual fs.readFile + MIME_TYPES di server lama.
-app.use(express.static('public'));
+// Production: serve hasil build Vite dari folder dist/
+// Development: frontend dijalankan via `npm run dev:frontend` di port 5173
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'dist')));
+} else {
+  // Saat dev, static lama (public/) tetap bisa diakses langsung via Express
+  app.use(express.static('public'));
+}
 
 app.use(session({
   secret: 'VFIsFKQCw1JDKsoG7DlT2vJJggYM1PurdoAG2rqn4i4=', // WAJIB diganti sebelum dipakai sungguhan
@@ -40,7 +49,9 @@ app.use(session({
    - POST/PUT/DELETE                    -> wajib login (requireAuth)
 ========================================================== */
 app.use('/api', authRoutes);
+app.use('/api/sto', stoRoutes);
 app.use('/api/odc', odcRoutes);
+app.use('/api/olt', oltRoutes);
 app.use('/api/odp', odpRoutes);
 app.use('/api/kabel', kabelRoutes);
 app.use('/api/klien', klienRoutes);
@@ -71,16 +82,16 @@ app.listen(PORT, HOST, () => {
   console.log('  Tekan Ctrl+C untuk menghentikan server');
   console.log('==========================================');
 
-  const localUrl = `http://localhost:${PORT}`;
-  const platform = process.platform;
-  let cmd;
-  if (platform === 'win32') cmd = `start "" "${localUrl}"`;
-  else if (platform === 'darwin') cmd = `open "${localUrl}"`;
-  else cmd = `xdg-open "${localUrl}"`;
+  // const localUrl = `http://localhost:${PORT}`;
+  // const platform = process.platform;
+  // let cmd;
+  // if (platform === 'win32') cmd = `start "" "${localUrl}"`;
+  // else if (platform === 'darwin') cmd = `open "${localUrl}"`;
+  // else cmd = `xdg-open "${localUrl}"`;
 
-  exec(cmd, (err) => {
-    if (err) {
-      console.log('Tidak bisa membuka browser otomatis. Buka manual: ' + localUrl);
-    }
-  });
+  // exec(cmd, (err) => {
+  //   if (err) {
+  //     console.log('Tidak bisa membuka browser otomatis. Buka manual: ' + localUrl);
+  //   }
+  // });
 });

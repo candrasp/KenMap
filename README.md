@@ -1,6 +1,6 @@
 # Aplikasi KenMap
 
-Aplikasi manajemen jaringan fiber optik (FTTH) berbasis peta, mencakup pengelolaan perangkat (ODC, ODP), pelanggan, dan jalur kabel — dilengkapi tampilan peta satelit offline khusus wilayah Kabupaten Ponorogo.
+Aplikasi manajemen jaringan fiber optik (FTTH) berbasis peta, mencakup pengelolaan perangkat (STO, ODC, ODP), pelanggan, dan jalur kabel — dilengkapi tampilan peta satelit dan jalan offline khusus wilayah Kabupaten Ponorogo.
 
 ## Fitur
 
@@ -25,31 +25,79 @@ Aplikasi manajemen jaringan fiber optik (FTTH) berbasis peta, mencakup pengelola
 
 ```
 KenMap/
-├── server.js
-├── db.js                  
-├── seed-admin.js
+├── server.js                 (Express backend server)
+├── db.js                     (SQLite database initialization)
+├── seed-admin.js             (script untuk membuat akun admin pertama)
+├── vite.config.js            (Vite frontend bundler config)
 ├── package.json
-├── ftth.db                 (dibuat otomatis saat server pertama dijalankan)
+├── ftth.db                   (dibuat otomatis saat server pertama dijalankan)
 ├── routes/
-│   ├── auth.js
-│   ├── odc.js
-│   ├── odp.js
-│   ├── kabel.js
-│   └── klien.js
+│   ├── auth.js               (autentikasi login/logout)
+│   ├── odc.js                (CRUD Optical Distribution Cabinet)
+│   ├── odp.js                (CRUD Optical Distribution Point)
+│   ├── olt.js                (CRUD Optical Line Terminal)
+│   ├── kabel.js              (CRUD jalur kabel/feeder/drop)
+│   ├── klien.js              (CRUD pelanggan FTTH)
+│   ├── sto.js                (CRUD Splice/Terminal Office)
+│   ├── pins.js               (unified endpoint untuk ODC/ODP/klien pins)
+│   └── pengaturan.js         (settings/configuration endpoints)
 ├── middleware/
-│   └── requireAuth.js
-└── public/
-    ├── index.html          (file peta Anda, di-rename dari peta-ponorogo.html)
-    ├── data-kota.geojson
-    ├── data-kecamatan.geojson
-    ├── data-desa.geojson
-    ├── data-jalan.geojson
-    └── icons/
+│   └── requireAuth.js        (middleware proteksi route yang wajib login)
+├── utils/
+│   └── geocodeLocal.js       (reverse geocoding menggunakan GeoJSON lokal)
+├── src/
+│   ├── main.js               (entry point Vue)
+│   ├── App.vue               (root component)
+│   ├── components/
+│   │   ├── MapView.vue       (main map container)
+│   │   ├── DetailPanel.vue   (sliding panel untuk detail device)
+│   │   ├── SidePanel.vue     (sidebar untuk filter/legend)
+│   │   ├── MeasureTool.vue   (measurement tool on map)
+│   │   ├── CoordinateSearch.vue (coordinate search bar)
+│   │   ├── NotificationContainer.vue (notification toast system)
+│   │   ├── auth/
+│   │   │   ├── LoginModal.vue
+│   │   │   └── LoginButton.vue
+│   │   ├── pins/
+│   │   │   └── PinModal.vue  (modal untuk tambah pin/catatan)
+│   │   └── modals/
+│   │       ├── EditOdcModal.vue
+│   │       ├── EditOdpModal.vue
+│   │       ├── EditStoModal.vue
+│   │       └── EditKlienModal.vue
+│   ├── stores/
+│   │   ├── infrastruktur.js  (Pinia store untuk data perangkat)
+│   │   └── auth.js           (Pinia store untuk session login)
+│   ├── composables/
+│   │   ├── useLeaflet.js     (Leaflet map initialization & control)
+│   │   └── useNotification.js (notification toast management)
+│   ├── router/
+│   │   └── index.js          (Vue Router configuration)
+│   ├── views/
+│   │   └── MapPage.vue       (main page view)
+│   └── assets/               (CSS global, icons, dll)
+├── public/
+│   ├── data-kota.geojson     (boundary kota/kabupaten)
+│   ├── data-kecamatan.geojson (boundary kecamatan)
+│   ├── data-desa.geojson     (boundary desa/kelurahan)
+│   ├── data-jalan.geojson    (jalan raya & sekunder)
+│   ├── style.css             (dark theme CSS Supabase style)
+│   ├── icons/
+│   │   ├── odc.svg, odp-tiang.svg, odp-tanam.svg, klien-*.svg
+│   │   ├── sto.svg           (Splice/Terminal Office icon)
+│   │   ├── basemap-satelit.png (thumbnail untuk toggle basemap)
+│   │   ├── basemap-jalan.png   (thumbnail untuk toggle basemap)
+│   │   ├── locate-fixed.svg    (map reset/center icon)
+│   │   ├── chevron-down.svg, log-in.svg, log-out.svg
+│   │   └── (ikon lainnya)
+│   └── fonts/
+│       └── InterVariable.woff2 (font Inter variable)
+├── dist/                     (build output, dibuat saat npm run build)
 ```
 
 ## Instalasi
 
-Pastikan sudah menginstal [Node.js](https://nodejs.org/) versi 18 ke atas.
+Pastikan sudah menginstal [Node.js](https://nodejs.org/) versi 22 ke atas.
 
 ```bash
 npm install

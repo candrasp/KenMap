@@ -2,8 +2,11 @@
 const express = require('express');
 const db = require('../db');
 const requireAuth = require('../middleware/requireAuth');
+const { getDesaFromCoordinates } = require('../utils/geocodeLocal');
 
 const router = express.Router();
+
+
 
 router.get('/', (req, res) => {
   const rows = db.prepare(`
@@ -21,8 +24,8 @@ router.get('/:id', (req, res) => {
   res.json(row);
 });
 
-router.post('/', requireAuth, (req, res) => {
-  const { nama, alamat, lat, lng, odp_id, nomor_port, status } = req.body;
+router.post('/', requireAuth, async (req, res) => {
+  const { nama, alamat, lat, lng, odp_id, nomor_port, status, ip, nomor_hp, onu_id, catatan } = req.body;
   if (!nama) return res.status(400).json({ error: 'nama wajib diisi.' });
 
   // Validasi: pastikan port di ODP itu belum dipakai klien lain
@@ -35,19 +38,33 @@ router.post('/', requireAuth, (req, res) => {
     }
   }
 
+  // Insert klien dahulu dengan alamat yang sudah ada (bisa null)
   const stmt = db.prepare(`
-    INSERT INTO klien (nama, alamat, lat, lng, odp_id, nomor_port, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO klien (nama, alamat, lat, lng, odp_id, nomor_port, status, ip, nomor_hp, onu_id, catatan)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const info = stmt.run(
     nama, alamat || null, lat || null, lng || null,
-    odp_id || null, nomor_port || null, status || 'pending'
+    odp_id || null, nomor_port || null, status || 'pending',
+    ip || null, nomor_hp || null, onu_id || null, catatan || null
   );
-  res.status(201).json({ id: info.lastInsertRowid });
+  const newId = info.lastInsertRowid;
+
+  // Auto-fill alamat dari koordinat menggunakan data lokal (data-desa.geojson)
+  // Ini sinkron, instan, tanpa network — langsung masuk ke insert di atas
+  if (!alamat && lat != null && lng != null) {
+    const desaName = getDesaFromCoordinates(parseFloat(lat), parseFloat(lng));
+    if (desaName) {
+      db.prepare('UPDATE klien SET alamat = ? WHERE id = ?').run(desaName, newId);
+      console.log(`[geocodeLocal] Alamat klien #${newId}: ${desaName}`);
+    }
+  }
+
+  res.status(201).json({ id: newId });
 });
 
 router.put('/:id', requireAuth, (req, res) => {
-  const { nama, alamat, lat, lng, odp_id, nomor_port, status } = req.body;
+  const { nama, alamat, lat, lng, odp_id, nomor_port, status, ip, nomor_hp, onu_id, catatan } = req.body;
   const existing = db.prepare('SELECT * FROM klien WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Klien tidak ditemukan.' });
 
@@ -63,7 +80,7 @@ router.put('/:id', requireAuth, (req, res) => {
   }
 
   db.prepare(`
-    UPDATE klien SET nama = ?, alamat = ?, lat = ?, lng = ?, odp_id = ?, nomor_port = ?, status = ?
+    UPDATE klien SET nama = ?, alamat = ?, lat = ?, lng = ?, odp_id = ?, nomor_port = ?, status = ?, ip = ?, nomor_hp = ?, onu_id = ?, catatan = ?, updated_pada = CURRENT_TIMESTAMP
     WHERE id = ?
   `).run(
     nama ?? existing.nama,
@@ -73,6 +90,10 @@ router.put('/:id', requireAuth, (req, res) => {
     targetOdp,
     targetPort,
     status ?? existing.status,
+    ip ?? existing.ip,
+    nomor_hp ?? existing.nomor_hp,
+    onu_id ?? existing.onu_id,
+    catatan ?? existing.catatan,
     req.params.id
   );
   res.json({ message: 'Klien berhasil diperbarui.' });

@@ -51,4 +51,28 @@ router.delete('/:id', requireAuth, (req, res) => {
   res.json({ message: 'Kabel berhasil dihapus.' });
 });
 
+router.put('/:id', requireAuth, (req, res) => {
+  const { jenis, dari_tipe, dari_id, ke_tipe, ke_id, koordinat, panjang_meter, jumlah_core } = req.body;
+  const existing = db.prepare('SELECT * FROM kabel WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Kabel tidak ditemukan.' });
+
+  const geometry = koordinat ? JSON.stringify({ type: 'LineString', coordinates: koordinat }) : existing.geometry;
+
+  db.prepare(`
+    UPDATE kabel SET jenis = ?, dari_tipe = ?, dari_id = ?, ke_tipe = ?, ke_id = ?, geometry = ?, panjang_meter = ?, jumlah_core = ?, updated_pada = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(
+    jenis ?? existing.jenis,
+    dari_tipe ?? existing.dari_tipe,
+    dari_id ?? existing.dari_id,
+    ke_tipe ?? existing.ke_tipe,
+    ke_id ?? existing.ke_id,
+    geometry,
+    panjang_meter ?? existing.panjang_meter,
+    jumlah_core ?? existing.jumlah_core,
+    req.params.id
+  );
+  res.json({ message: 'Kabel berhasil diperbarui.' });
+});
+
 module.exports = router;

@@ -47,3 +47,10 @@ sessions/
 tmp/
 temp/
 *.tmp
+
+GEMINI.md
+CLAUDE.md
+data/
+scratch/
+
+
