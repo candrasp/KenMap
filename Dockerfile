@@ -27,7 +27,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Source backend
-COPY server.js db.js migrate-sqlite-to-pg.js ./
+COPY server.js db.js ./
 COPY routes ./routes
 COPY middleware ./middleware
 COPY utils ./utils
