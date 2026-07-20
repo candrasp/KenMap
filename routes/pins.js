@@ -57,19 +57,19 @@ router.post("/", requireAuth, async (req, res) => {
 
   try {
     let insertedId;
+    let insertedAlamat = null;
 
     if (type === "sto") {
       const kode = await generateUniqueStoKode(name);
+      const desaName = getDesaFromCoordinates(parseFloat(lat), parseFloat(lng));
+      insertedAlamat = desaName || null;
       const { rows } = await pool.query(
         `INSERT INTO sto (kode, nama, alamat, lat, lng, catatan)
          VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-        [kode, name, null, parseFloat(lat), parseFloat(lng), keterangan || null],
+        [kode, name, insertedAlamat, parseFloat(lat), parseFloat(lng), keterangan || null],
       );
       insertedId = rows[0].id;
-
-      const desaName = getDesaFromCoordinates(parseFloat(lat), parseFloat(lng));
       if (desaName) {
-        await pool.query("UPDATE sto SET alamat = $1 WHERE id = $2", [desaName, insertedId]);
         console.log(`[geocodeLocal] Alamat STO #${insertedId}: ${desaName}`);
       }
     } else if (type === "odc") {
@@ -79,16 +79,23 @@ router.post("/", requireAuth, async (req, res) => {
           error: `tipe_pemasangan ODC harus salah satu dari: ${TIPE_PEMASANGAN_ODC_VALID.join(", ")}.`,
         });
       }
+      const desaName = getDesaFromCoordinates(parseFloat(lat), parseFloat(lng));
+      insertedAlamat = desaName || null;
       const { rows } = await pool.query(
         `INSERT INTO odc (nama, alamat, lat, lng, kapasitas_port, tipe_pemasangan, catatan)
          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-        [name, null, parseFloat(lat), parseFloat(lng), 0, tipePemasangan, keterangan || null],
+        [
+          name,
+          insertedAlamat,
+          parseFloat(lat),
+          parseFloat(lng),
+          0,
+          tipePemasangan,
+          keterangan || null,
+        ],
       );
       insertedId = rows[0].id;
-
-      const desaName = getDesaFromCoordinates(parseFloat(lat), parseFloat(lng));
       if (desaName) {
-        await pool.query("UPDATE odc SET alamat = $1 WHERE id = $2", [desaName, insertedId]);
         console.log(`[geocodeLocal] Alamat ODC #${insertedId}: ${desaName}`);
       }
     } else if (type === "odp" || type === "odp-tanam" || type === "odp-tiang") {
@@ -103,16 +110,23 @@ router.post("/", requireAuth, async (req, res) => {
           });
         }
       }
+      const desaName = getDesaFromCoordinates(parseFloat(lat), parseFloat(lng));
+      insertedAlamat = desaName || null;
       const { rows } = await pool.query(
         `INSERT INTO odp (nama, alamat, lat, lng, kapasitas_port, tipe_pemasangan, catatan)
          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-        [name, null, parseFloat(lat), parseFloat(lng), 8, tipePemasangan, keterangan || null],
+        [
+          name,
+          insertedAlamat,
+          parseFloat(lat),
+          parseFloat(lng),
+          8,
+          tipePemasangan,
+          keterangan || null,
+        ],
       );
       insertedId = rows[0].id;
-
-      const desaName = getDesaFromCoordinates(parseFloat(lat), parseFloat(lng));
       if (desaName) {
-        await pool.query("UPDATE odp SET alamat = $1 WHERE id = $2", [desaName, insertedId]);
         console.log(`[geocodeLocal] Alamat ODP #${insertedId}: ${desaName}`);
       }
     } else if (type === "klien-aktif" || type === "klien-nonaktif" || type === "klien-pending") {
@@ -123,24 +137,18 @@ router.post("/", requireAuth, async (req, res) => {
       };
       const status = statusMap[type];
       const computedAlamat = getDesaFromCoordinates(parseFloat(lat), parseFloat(lng));
+      insertedAlamat = computedAlamat || null;
       const { rows } = await pool.query(
         `INSERT INTO klien (nama, alamat, lat, lng, status, catatan)
          VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-        [
-          name,
-          computedAlamat || null,
-          parseFloat(lat),
-          parseFloat(lng),
-          status,
-          keterangan || null,
-        ],
+        [name, insertedAlamat, parseFloat(lat), parseFloat(lng), status, keterangan || null],
       );
       insertedId = rows[0].id;
     } else {
       return res.status(400).json({ error: `Tipe pin tidak dikenal: ${type}` });
     }
 
-    return res.status(201).json({ id: insertedId, type, name });
+    return res.status(201).json({ id: insertedId, type, name, alamat: insertedAlamat });
   } catch (err) {
     console.error("[/api/pins] Error:", err.message);
     return res.status(500).json({ error: "Gagal menyimpan pin ke database." });

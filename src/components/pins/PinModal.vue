@@ -33,7 +33,7 @@
           <form @submit.prevent="onSubmit">
             <div class="input-group">
               <label>Nama</label>
-              <input v-model="pinName" type="text" required placeholder="Nama lokasi..." />
+              <input v-model="pinName" type="text" required placeholder="Nama" />
             </div>
             <div v-if="selectedType === 'odc' || selectedType === 'odp'" class="input-group">
               <label>Tipe Pemasangan</label>

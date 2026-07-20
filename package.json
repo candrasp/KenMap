@@ -1,7 +1,7 @@
 {
-  "name": "aplikasi-ftth-ponorogo",
-  "version": "1.0.0",
-  "description": "Aplikasi manajemen jaringan FTTH (ODC, ODP, kabel, klien) dengan peta offline Ponorogo",
+  "name": "KenMap",
+  "version": "1.1.0",
+  "description": "Aplikasi manajemen jaringan FTTH (STO, OLT, ODC, ODP, kabel, klien) dengan peta offline Ponorogo",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

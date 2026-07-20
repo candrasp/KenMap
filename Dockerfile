@@ -31,6 +31,7 @@ COPY server.js db.js ./
 COPY routes ./routes
 COPY middleware ./middleware
 COPY utils ./utils
+COPY public ./public
 
 # Hasil build frontend dari stage 'build' (bukan dari devDependencies-nya)
 COPY --from=build /app/dist ./dist
