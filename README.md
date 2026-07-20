@@ -4,7 +4,7 @@ Aplikasi manajemen jaringan fiber optik (FTTH) berbasis peta, mencakup pengelola
 
 ## Fitur
 
-- **Peta satelit offline** — citra Esri World Imagery, area Kabupaten Ponorogo, dapat diunduh untuk dipakai tanpa koneksi internet.
+- **Peta satelit dan jalan offline** — citra Esri World Imagery, area Kabupaten Ponorogo, dapat diunduh untuk dipakai tanpa koneksi internet.
 - **Batas wilayah** — tampilan batas kota/kabupaten, kecamatan, dan desa/kelurahan.
 - **Manajemen perangkat** — pencatatan lokasi dan kapasitas ODC (Optical Distribution Cabinet) dan ODP (Optical Distribution Point).
 - **Manajemen kabel** — jalur kabel feeder, distribusi, dan drop digambarkan sebagai garis di peta (titik A–B–C dan seterusnya), lengkap dengan panjang dan jumlah core.
@@ -16,7 +16,7 @@ Aplikasi manajemen jaringan fiber optik (FTTH) berbasis peta, mencakup pengelola
 | Komponen        | Teknologi                                         |
 | --------------- | ------------------------------------------------- |
 | Backend         | Node.js + Express                                 |
-| Database        | SQLite (`better-sqlite3`), mode WAL               |
+| Database        | PostgreSQL                                        |
 | Autentikasi     | `express-session` + `bcrypt`                      |
 | Peta (frontend) | Leaflet.js + Esri World Imagery                   |
 | Data spasial    | GeoJSON (disimpan sebagai teks di kolom database) |
@@ -26,11 +26,10 @@ Aplikasi manajemen jaringan fiber optik (FTTH) berbasis peta, mencakup pengelola
 ```
 KenMap/
 ├── server.js                 (Express backend server)
-├── db.js                     (SQLite database initialization)
+├── db.js                     (PostgreSQL database initialization)
 ├── seed-admin.js             (script untuk membuat akun admin pertama)
 ├── vite.config.js            (Vite frontend bundler config)
 ├── package.json
-├── ftth.db                   (dibuat otomatis saat server pertama dijalankan)
 ├── routes/
 │   ├── auth.js               (autentikasi login/logout)
 │   ├── odc.js                (CRUD Optical Distribution Cabinet)
@@ -92,12 +91,11 @@ KenMap/
 │   │   └── (ikon lainnya)
 │   └── fonts/
 │       └── InterVariable.woff2 (font Inter variable)
-├── dist/                     (build output, dibuat saat npm run build)
 ```
 
 ## Instalasi
 
-Pastikan sudah menginstal [Node.js](https://nodejs.org/) versi 22 ke atas.
+Pastikan sudah menginstal [Node.js](https://nodejs.org/) versi 20 ke atas.
 
 ```bash
 npm install
@@ -113,7 +111,7 @@ npm run dev
 npm start
 ```
 
-Setelah berjalan, buka `http://localhost:3000` di browser.
+Setelah berjalan, buka `http://localhost:port` di browser.
 
 ## Skema Database (ringkasan)
 

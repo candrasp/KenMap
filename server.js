@@ -1,46 +1,53 @@
 // server.js
-// Server Express untuk aplikasi KenMap.
-// Menggantikan server statis manual sebelumnya — express.static() sudah
-// menangani semua yang dulu ditulis manual (MIME type, baca file, dst),
-// ditambah sekarang ada API + login admin.
+// Server Express untuk aplikasi KenMap - versi Postgres.
+require("dotenv").config();
+const express = require("express");
+const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
+const path = require("path");
 
-const express = require('express');
-const session = require('express-session');
-const { exec } = require('child_process');
-const db = require('./db'); // otomatis membuat tabel kalau belum ada
+const { pool, initSchema } = require("./db");
 
-const authRoutes = require('./routes/auth');
-const stoRoutes = require('./routes/sto');
-const odcRoutes = require('./routes/odc');
-const oltRoutes = require('./routes/olt');
-const odpRoutes = require('./routes/odp');
-const kabelRoutes = require('./routes/kabel');
-const klienRoutes = require('./routes/klien');
-const pinsRoutes = require('./routes/pins');
-
-const path = require('path');
+const authRoutes = require("./routes/auth");
+const stoRoutes = require("./routes/sto");
+const odcRoutes = require("./routes/odc");
+const oltRoutes = require("./routes/olt");
+const odpRoutes = require("./routes/odp");
+const kabelRoutes = require("./routes/kabel");
+const klienRoutes = require("./routes/klien");
+const pinsRoutes = require("./routes/pins");
+const pengaturanRoutes = require("./routes/pengaturan");
 
 const app = express();
-const PORT = 3000;
-const HOST = '0.0.0.0';
+const PORT = process.env.PORT || 3000;
+const HOST = "0.0.0.0";
 
 app.use(express.json());
 
 // Production: serve hasil build Vite dari folder dist/
 // Development: frontend dijalankan via `npm run dev:frontend` di port 5173
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'dist')));
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "dist")));
 } else {
-  // Saat dev, static lama (public/) tetap bisa diakses langsung via Express
-  app.use(express.static('public'));
+  app.use(express.static("public"));
 }
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'VFIsFKQCw1JDKsoG7DlT2vJJggYM1PurdoAG2rqn4i4=',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 * 8 } // sesi login bertahan 8 jam
-}));
+// Session disimpan di Postgres (tabel 'session', dibuat otomatis oleh
+// connect-pg-simple kalau createTableIfMissing: true) - jadi login tidak
+// hilang saat container di-restart, dan konsisten kalau nanti scale > 1 instance.
+app.use(
+  session({
+    store: new pgSession({
+      pool,
+      tableName: "session",
+      createTableIfMissing: true,
+    }),
+    secret: process.env.SESSION_SECRET || "VFIsFKQCw1JDKsoG7DlT2vJJggYM1PurdoAG2rqn4i4=",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 8 }, // sesi login bertahan 8 jam
+  }),
+);
 
 /* ==========================================================
    ROUTES
@@ -48,50 +55,37 @@ app.use(session({
    - GET data (odc/odp/kabel/klien)    -> boleh diakses tanpa login (untuk peta)
    - POST/PUT/DELETE                    -> wajib login (requireAuth)
 ========================================================== */
-app.use('/api', authRoutes);
-app.use('/api/sto', stoRoutes);
-app.use('/api/odc', odcRoutes);
-app.use('/api/olt', oltRoutes);
-app.use('/api/odp', odpRoutes);
-app.use('/api/kabel', kabelRoutes);
-app.use('/api/klien', klienRoutes);
-app.use('/api/pins', pinsRoutes); // Unified pin endpoint (odc/odp/klien)
-// Proteksi login (requireAuth) sudah dipasang langsung di masing-masing
-// route POST/PUT/DELETE di dalam file routes/*.js, jadi GET tetap bisa
-// diakses tanpa login (dipakai untuk menampilkan data di peta), sementara
-// operasi ubah data wajib login.
+app.use("/api", authRoutes);
+app.use("/api/sto", stoRoutes);
+app.use("/api/odc", odcRoutes);
+app.use("/api/olt", oltRoutes);
+app.use("/api/odp", odpRoutes);
+app.use("/api/kabel", kabelRoutes);
+app.use("/api/klien", klienRoutes);
+app.use("/api/pins", pinsRoutes);
+app.use("/api/pengaturan", pengaturanRoutes);
 
-app.listen(PORT, HOST, () => {
-  const os = require('os');
-  const nets = os.networkInterfaces();
-  let localIp = 'unknown';
-  for (const iface of Object.values(nets)) {
-    for (const net of iface) {
-      if (net.family === 'IPv4' && !net.internal) {
-        localIp = net.address;
-        break;
-      }
-    }
-    if (localIp !== 'unknown') break;
-  }
-
-  console.log('==========================================');
-  console.log('  Server KenMap berjalan:');
-  console.log(`  Local   : http://localhost:${PORT}`);
-  console.log(`  Network : http://${localIp}:${PORT}`);
-  console.log('  Tekan Ctrl+C untuk menghentikan server');
-  console.log('==========================================');
-
-  // const localUrl = `http://localhost:${PORT}`;
-  // const platform = process.platform;
-  // let cmd;
-  // if (platform === 'win32') cmd = `start "" "${localUrl}"`;
-  // else if (platform === 'darwin') cmd = `open "${localUrl}"`;
-  // else cmd = `xdg-open "${localUrl}"`;
-
-  // exec(cmd, (err) => {
-  //   if (err) {
-  //     console.log('Tidak bisa membuka browser otomatis. Buka manual: ' + localUrl);
-  //   }
-  // });
+// Error handler terpusat - semua route pakai next(err) kalau ada error query,
+// jadi tidak ada unhandled promise rejection yang bikin server crash diam-diam.
+app.use((err, req, res, next) => {
+  console.error("[unhandled error]", err);
+  res.status(500).json({ error: "Terjadi kesalahan pada server." });
 });
+
+async function start() {
+  try {
+    await initSchema(); // buat tabel + migrasi + seed pengaturan & admin default
+    app.listen(PORT, HOST, () => {
+      console.log("==========================================");
+      console.log("  Server KenMap (Postgres) berjalan:");
+      console.log(`  http://localhost:${PORT}`);
+      console.log("  Tekan Ctrl+C untuk menghentikan server");
+      console.log("==========================================");
+    });
+  } catch (err) {
+    console.error("Gagal inisialisasi database / server:", err);
+    process.exit(1);
+  }
+}
+
+start();

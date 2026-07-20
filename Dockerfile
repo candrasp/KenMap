@@ -1,57 +1,41 @@
-# Gunakan base image Node.js versi 20 yang lengkap dengan build-essential
-# untuk keperluan compile better-sqlite3 native bindings.
-FROM node:20 AS builder
+# ============================================
+# Stage 1: build - install semua dependency (termasuk devDependencies
+# yang dibutuhkan Vite untuk build frontend) lalu build dist/
+# ============================================
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Salin package.json dan package-lock.json
+# Copy manifest dulu (bukan seluruh source) supaya layer ini di-cache
+# oleh Docker selama package.json tidak berubah -> rebuild jauh lebih cepat.
 COPY package*.json ./
-
-# Install dependensi (termasuk devDependencies untuk build Vite)
 RUN npm ci
 
-# Salin seluruh kode proyek
+# Baru copy seluruh source code, lalu build frontend Vue -> dist/
 COPY . .
-
-# Jalankan build frontend (Vite menghasilkan folder dist/)
 RUN npm run build
 
-# --- Stage Runtime ---
-FROM node:20-slim AS runner
+# ============================================
+# Stage 2: production - image final, cuma bawa yang perlu jalan
+# (server.js, node_modules produksi, dan hasil build dist/)
+# ============================================
+FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Install runtime dependencies jika diperlukan (seperti openssl, dll)
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-
-# Salin package files
 COPY package*.json ./
+RUN npm ci --omit=dev
 
-# Install hanya dependensi production (better-sqlite3 akan dicompilasi ulang untuk slim image)
-# Kita butuh compiler tools sementara untuk build better-sqlite3 di stage ini
-RUN apt-get update && apt-get install -y python3 make g++ \
-    && npm ci --only=production \
-    && apt-get purge -y python3 make g++ \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+# Source backend
+COPY server.js db.js migrate-sqlite-to-pg.js ./
+COPY routes ./routes
+COPY middleware ./middleware
+COPY utils ./utils
 
-# Salin file server dan asset statis hasil build dari builder
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/server.js ./server.js
-COPY --from=builder /app/db.js ./db.js
-COPY --from=builder /app/routes ./routes
-COPY --from=builder /app/middleware ./middleware
-COPY --from=builder /app/utils ./utils
+# Hasil build frontend dari stage 'build' (bukan dari devDependencies-nya)
+COPY --from=build /app/dist ./dist
 
-# Buat folder khusus data untuk menyimpan database SQLite secara persisten
-RUN mkdir -p /app/data
-
-# Environment variables default
 ENV NODE_ENV=production
-ENV PORT=3000
-ENV DB_PATH=/app/data/ftth.db
-
 EXPOSE 3000
 
-# Jalankan server
 CMD ["node", "server.js"]

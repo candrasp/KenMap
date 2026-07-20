@@ -1,21 +1,35 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: kenmap-app
+  db:
+    image: postgres:17-alpine
     restart: unless-stopped
+    environment:
+      POSTGRES_USER: kenmap
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-kenmap_dev_password}
+      POSTGRES_DB: kenmap
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kenmap -d kenmap"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://kenmap:${DB_PASSWORD:-kenmap_dev_password}@db:5432/kenmap
+      SESSION_SECRET: ${SESSION_SECRET:-ganti_session_secret_ini}
+      DEFAULT_ADMIN_USERNAME: ${DEFAULT_ADMIN_USERNAME:-admin}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-admin}
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - DB_PATH=/app/data/ftth.db
-      # Ganti secret di bawah ini dengan string acak yang aman di production!
-      - SESSION_SECRET=VFIsFKQCw1JDKsoG7DlT2vJJggYM1PurdoAG2rqn4i4=
-    volumes:
-      - kenmap_data:/app/data
 
 volumes:
-  kenmap_data:
-    driver: local
+  pgdata:
