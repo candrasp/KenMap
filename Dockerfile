@@ -2,7 +2,7 @@
 # Stage 1: build - install semua dependency (termasuk devDependencies
 # yang dibutuhkan Vite untuk build frontend) lalu build dist/
 # ============================================
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN npm run build
 # Stage 2: production - image final, cuma bawa yang perlu jalan
 # (server.js, node_modules produksi, dan hasil build dist/)
 # ============================================
-FROM node:20-alpine AS production
+FROM node:24-alpine AS production
 
 WORKDIR /app
 
