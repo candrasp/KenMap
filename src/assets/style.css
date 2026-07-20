@@ -65,7 +65,15 @@ body,
 /* Custom Zoom and Home Controls Dark Styling (Supabase dark design style) */
 .leaflet-bottom.leaflet-right {
   margin-bottom: 0px !important;
-  margin-right: 10px !important;
+  margin-right: 0px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.leaflet-bottom.leaflet-left {
+  margin-bottom: 0px !important;
+  margin-left: 5px !important;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -509,6 +517,7 @@ body,
   color: var(--sb-text-primary);
   margin-bottom: 6px;
   letter-spacing: -0.01em;
+  padding-right: 18px;
 }
 
 .popup-coords {
@@ -626,6 +635,11 @@ body,
   z-index: 1000 !important;
   /* Menaikkan tumpukan marker saat di-hover */
 }
+.leaflet-marker-icon:active {
+  filter: brightness(1.25) drop-shadow(0 0 6px var(--sb-accent)) !important;
+  z-index: 1000 !important;
+  /* Menaikkan tumpukan marker saat di-hover */
+}
 
 /* Global Minimalist Scrollbar */
 ::-webkit-scrollbar {
@@ -668,7 +682,9 @@ body,
   height: 44px !important;
   display: block;
   object-fit: cover;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
 
 .basemap-toggle img:hover {

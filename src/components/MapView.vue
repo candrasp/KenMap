@@ -5,10 +5,10 @@
 <script setup>
 import { useLeaflet } from '@/composables/useLeaflet'
 
-const { map, statusText, isOnline } = useLeaflet('map')
+const { map, statusText, isOnline, activeSettings, fetchSettings } = useLeaflet('map')
 
 // Expose untuk dipakai di MapPage
-defineExpose({ map, statusText, isOnline })
+defineExpose({ map, statusText, isOnline, activeSettings, fetchSettings })
 </script>
 
 <style scoped>

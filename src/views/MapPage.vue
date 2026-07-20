@@ -6,10 +6,16 @@
 
     <div class="top-right-controls">
       <CoordinateSearch :map="mapRef" />
-      <LoginButton @open-login="loginModalVisible = true" />
+      <LoginButton @open-login="loginModalVisible = true" @open-settings="settingsModalVisible = true" />
     </div>
 
     <LoginModal :visible="loginModalVisible" @close="loginModalVisible = false" />
+    <SettingsModal 
+      :visible="settingsModalVisible" 
+      :initial-settings="mapViewRef?.activeSettings"
+      @close="settingsModalVisible = false"
+      @settings-updated="mapViewRef?.fetchSettings"
+    />
 
     <MeasureTool v-if="mapRef" :map="mapRef" />
     <SidePanel :is-online="isOnline" :status-text="statusText" />
@@ -40,6 +46,7 @@ import SidePanel from "@/components/SidePanel.vue";
 import DetailPanel from "@/components/DetailPanel.vue";
 import PinModal from "@/components/pins/PinModal.vue";
 import CoordinateSearch from "@/components/CoordinateSearch.vue";
+import SettingsModal from "@/components/auth/SettingsModal.vue";
 
 const auth = useAuthStore();
 const mapViewRef = ref(null);
@@ -48,6 +55,7 @@ const isOnline = ref(navigator.onLine);
 const statusText = ref("Memuat data…");
 
 const loginModalVisible = ref(false);
+const settingsModalVisible = ref(false);
 const pinModalVisible = ref(false);
 const pinLat = ref(0);
 const pinLng = ref(0);

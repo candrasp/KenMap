@@ -24,11 +24,21 @@
         <img src="/icons/settings.svg" alt="Setting" style="width:16px;height:16px;filter:invert(0.7);" />
         Setting
       </button>
-      <button class="dropdown-item" @click="onLogout">
+      <button class="dropdown-item" @click="onLogoutClick">
         <img src="/icons/log-out.svg" alt="Logout" style="width:16px;height:16px;filter:invert(0.7);" />
         Logout
       </button>
     </div>
+
+    <!-- Confirmation Modal -->
+    <ConfirmationModal
+      :visible="confirmLogoutVisible"
+      title="Logout"
+      message="Apakah Anda yakin ingin logout?"
+      confirm-text="Ya, Logout"
+      @confirm="onLogoutConfirm"
+      @cancel="confirmLogoutVisible = false"
+    />
   </div>
 </template>
 
@@ -36,33 +46,40 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useNotification } from '@/composables/useNotification'
+import ConfirmationModal from '@/components/modals/ConfirmationModal.vue'
 
 const auth = useAuthStore()
-const { error, info } = useNotification()
+const { error } = useNotification()
 const dropdownOpen = ref(false)
+const confirmLogoutVisible = ref(false)
 
-defineEmits(['open-login'])
+const emit = defineEmits(['open-login', 'open-settings'])
 
 function toggleDropdown() {
   dropdownOpen.value = !dropdownOpen.value
 }
 
-async function onLogout() {
-  if (!confirm('Apakah Anda yakin ingin logout?')) return
+function onLogoutClick() {
+  dropdownOpen.value = false
+  confirmLogoutVisible.value = true
+}
+
+async function onLogoutConfirm() {
   const ok = await auth.logout()
   if (ok) {
-    dropdownOpen.value = false
+    confirmLogoutVisible.value = false
     window.location.reload()
   } else {
     error('Gagal melakukan logout.')
+    confirmLogoutVisible.value = false
   }
 }
 
 function onSetting() {
-  info('Fitur setting belum tersedia')
+  dropdownOpen.value = false
+  emit('open-settings')
 }
 
-// Tutup dropdown saat klik di luar
 function onDocClick() {
   dropdownOpen.value = false
 }
