@@ -6,12 +6,16 @@
 
     <div class="top-right-controls">
       <CoordinateSearch :map="mapRef" />
-      <LoginButton @open-login="loginModalVisible = true" @open-settings="settingsModalVisible = true" />
+      <LoginButton
+        @open-login="loginModalVisible = true"
+        @open-settings="settingsModalVisible = true"
+        @open-panduan="panduanModalVisible = true"
+      />
     </div>
 
     <LoginModal :visible="loginModalVisible" @close="loginModalVisible = false" />
-    <SettingsModal 
-      :visible="settingsModalVisible" 
+    <SettingsModal
+      :visible="settingsModalVisible"
       :initial-settings="mapViewRef?.activeSettings"
       @close="settingsModalVisible = false"
       @settings-updated="mapViewRef?.fetchSettings"
@@ -21,9 +25,7 @@
     <SidePanel :is-online="isOnline" :status-text="statusText" />
     <DetailPanel />
 
-    <div class="copyright">
-      &copy; {{ new Date().getFullYear() }} KenMap v1.1.0- Develop by CandraSP
-    </div>
+    <div class="copyright">&copy; {{ new Date().getFullYear() }} CandraSP. KenMap v1.1.0</div>
 
     <PinModal
       :visible="pinModalVisible"
@@ -31,6 +33,8 @@
       :lng="pinLng"
       @close="pinModalVisible = false"
     />
+
+    <PanduanModal :visible="panduanModalVisible" @close="panduanModalVisible = false" />
   </div>
 </template>
 
@@ -47,6 +51,7 @@ import DetailPanel from "@/components/DetailPanel.vue";
 import PinModal from "@/components/pins/PinModal.vue";
 import CoordinateSearch from "@/components/CoordinateSearch.vue";
 import SettingsModal from "@/components/auth/SettingsModal.vue";
+import PanduanModal from "@/components/modals/PanduanModal.vue";
 
 const auth = useAuthStore();
 const mapViewRef = ref(null);
@@ -57,6 +62,7 @@ const statusText = ref("Memuat data…");
 const loginModalVisible = ref(false);
 const settingsModalVisible = ref(false);
 const pinModalVisible = ref(false);
+const panduanModalVisible = ref(false);
 const pinLat = ref(0);
 const pinLng = ref(0);
 
@@ -65,6 +71,11 @@ window.__openPinModal = (lat, lng) => {
   pinLat.value = lat;
   pinLng.value = lng;
   pinModalVisible.value = true;
+};
+
+// Expose openPanduanModal ke window untuk dipanggil dari map control
+window.__openPanduanModal = () => {
+  panduanModalVisible.value = true;
 };
 
 onMounted(async () => {
@@ -96,10 +107,10 @@ onMounted(async () => {
   position: fixed;
   bottom: 0px;
   left: 0px;
-  font-size: 9px;
+  font-size: 8px;
   color: white;
   background: rgba(0, 0, 0, 0.4);
-  padding: 2px 6px;
+  padding: 2px 2px;
   border-radius: 4px;
   z-index: 1000;
   pointer-events: none;

@@ -351,6 +351,28 @@ export function useLeaflet(mapContainerId) {
     // Controls: zoom + reset view (bottom-right)
     L.control.zoom({ position: "bottomright" }).addTo(map.value);
 
+    const PanduanControl = L.Control.extend({
+      onAdd(m) {
+        const container = L.DomUtil.create(
+          "div",
+          "leaflet-bar leaflet-control leaflet-control-custom",
+        );
+        container.title = "Panduan Penggunaan";
+        const img = document.createElement("img");
+        img.src = "/icons/circle-question-mark.svg";
+        img.style.filter = "invert(0.7)";
+        container.appendChild(img);
+        container.onclick = (e) => {
+          e.stopPropagation();
+          if (window.__openPanduanModal) {
+            window.__openPanduanModal();
+          }
+        };
+        return container;
+      },
+    });
+    new PanduanControl({ position: "bottomright" }).addTo(map.value);
+
     const ResetViewControl = L.Control.extend({
       onAdd(m) {
         const container = L.DomUtil.create(
