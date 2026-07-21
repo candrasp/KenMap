@@ -65,33 +65,63 @@
             <form @submit.prevent="handlePasswordChange" class="password-form">
               <div class="input-group">
                 <label for="old-pass">Password Lama</label>
-                <input 
-                  id="old-pass" 
-                  v-model="oldPassword" 
-                  type="password" 
-                  required 
-                  placeholder="Masukkan password saat ini" 
-                />
+                <div class="password-input-wrapper">
+                  <input
+                    id="old-pass"
+                    v-model="oldPassword"
+                    :type="showOldPassword ? 'text' : 'password'"
+                    required
+                    placeholder="Masukkan password saat ini"
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle-btn"
+                    @click="showOldPassword = !showOldPassword"
+                    :title="showOldPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                  >
+                    <img :src="showOldPassword ? '/icons/eye-off.svg' : '/icons/eye.svg'" alt="Toggle" />
+                  </button>
+                </div>
               </div>
               <div class="input-group">
                 <label for="new-pass">Password Baru</label>
-                <input 
-                  id="new-pass" 
-                  v-model="newPassword" 
-                  type="password" 
-                  required 
-                  placeholder="Masukkan password baru" 
-                />
+                <div class="password-input-wrapper">
+                  <input
+                    id="new-pass"
+                    v-model="newPassword"
+                    :type="showNewPassword ? 'text' : 'password'"
+                    required
+                    placeholder="Masukkan password baru"
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle-btn"
+                    @click="showNewPassword = !showNewPassword"
+                    :title="showNewPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                  >
+                    <img :src="showNewPassword ? '/icons/eye-off.svg' : '/icons/eye.svg'" alt="Toggle" />
+                  </button>
+                </div>
               </div>
               <div class="input-group">
                 <label for="confirm-pass">Konfirmasi Password Baru</label>
-                <input 
-                  id="confirm-pass" 
-                  v-model="confirmPassword" 
-                  type="password" 
-                  required 
-                  placeholder="Ketik ulang password baru" 
-                />
+                <div class="password-input-wrapper">
+                  <input
+                    id="confirm-pass"
+                    v-model="confirmPassword"
+                    :type="showConfirmPassword ? 'text' : 'password'"
+                    required
+                    placeholder="Ketik ulang password baru"
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle-btn"
+                    @click="showConfirmPassword = !showConfirmPassword"
+                    :title="showConfirmPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                  >
+                    <img :src="showConfirmPassword ? '/icons/eye-off.svg' : '/icons/eye.svg'" alt="Toggle" />
+                  </button>
+                </div>
               </div>
 
               <div v-if="pwdError" class="status-msg error">{{ pwdError }}</div>
@@ -142,13 +172,23 @@
                   </div>
                   <div class="input-group">
                     <label for="new-adm-pass">Password</label>
-                    <input 
-                      id="new-adm-pass"
-                      v-model="addAdminPass" 
-                      type="password" 
-                      required 
-                      placeholder="Password baru" 
-                    />
+                    <div class="password-input-wrapper">
+                      <input
+                        id="new-adm-pass"
+                        v-model="addAdminPass"
+                        :type="showAddAdminPass ? 'text' : 'password'"
+                        required
+                        placeholder="Password baru"
+                      />
+                      <button
+                        type="button"
+                        class="password-toggle-btn"
+                        @click="showAddAdminPass = !showAddAdminPass"
+                        :title="showAddAdminPass ? 'Sembunyikan password' : 'Tampilkan password'"
+                      >
+                        <img :src="showAddAdminPass ? '/icons/eye-off.svg' : '/icons/eye.svg'" alt="Toggle" />
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <button type="submit" class="submit-btn" :disabled="addAdminLoading">
@@ -279,6 +319,9 @@ const confirmPassword = ref('')
 const pwdLoading = ref(false)
 const pwdError = ref('')
 const pwdSuccess = ref('')
+const showOldPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
 
 // Admin Management Form
 const adminList = ref([])
@@ -287,6 +330,7 @@ const addAdminUser = ref('')
 const addAdminPass = ref('')
 const usernameLoading = ref(false)
 const addAdminLoading = ref(false)
+const showAddAdminPass = ref(false)
 
 watch(() => props.visible, (v) => {
   if (v) {
@@ -301,10 +345,14 @@ watch(() => props.visible, (v) => {
     confirmPassword.value = ''
     pwdError.value = ''
     pwdSuccess.value = ''
+    showOldPassword.value = false
+    showNewPassword.value = false
+    showConfirmPassword.value = false
     
     newUsername.value = auth.username
     addAdminUser.value = ''
     addAdminPass.value = ''
+    showAddAdminPass.value = false
   }
 }, { immediate: true })
 
@@ -692,6 +740,41 @@ input:disabled + .switch-slider {
 
 .input-group input:focus {
   border-color: #3ecf8e;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  color: #a1a1aa;
+  transition: color 0.2s;
+}
+
+.password-toggle-btn:hover {
+  color: #ededed;
+}
+
+.password-toggle-btn img {
+  width: 16px;
+  height: 16px;
+  filter: invert(0.7);
 }
 
 .status-msg {

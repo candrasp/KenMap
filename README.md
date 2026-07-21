@@ -216,6 +216,14 @@ Data batas wilayah dan jalan diperoleh dari sumber berikut:
 
 Catatan: kelengkapan nama jalan mengikuti kelengkapan data OpenStreetMap di wilayah tersebut, yang kemungkinan tidak selengkap Google Maps terutama untuk jalan-jalan kecil di desa.
 
+## Data Peta & Atribusi
+
+Data batas wilayah dan peta dasar diperoleh dari sumber berikut:
+
+- **Batas Kota/Kecamatan/Desa:** Data resmi BPS / BIG.
+- **Data Jalan:** Diekstrak dari [Geofabrik](https://download.geofabrik.de/) / [OpenStreetMap](https://www.openstreetmap.org/) di bawah lisensi [ODbL](https://opendatacommons.org/licenses/odbl/). © Kontributor OpenStreetMap.
+- **Citra Satelit:** Esri World Imagery (Esri, Maxar, Earthstar Geographics, dan Komunitas GIS).
+
 ## Lisensi
 
-Internal / belum ditentukan.
+Aplikasi ini dilisensikan di bawah **GNU General Public License v3.0 (GPLv3)**. Lihat berkas [LICENSE.md](./LICENSE.md) untuk rincian lengkap.

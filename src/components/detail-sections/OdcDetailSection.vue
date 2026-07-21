@@ -24,6 +24,17 @@
       <span class="label">Kapasitas Port</span>
       <span class="value">{{ data.kapasitas_port || 0 }} Port</span>
     </div>
+    <div class="detail-row">
+      <span class="label">Port Terpakai</span>
+      <div class="usage-container">
+        <span class="value"
+          ><strong>{{ data.port_terpakai || 0 }}</strong> / {{ data.kapasitas_port || 0 }} Port</span
+        >
+        <div class="progress-bar">
+          <div class="progress" :style="{ width: usagePercentage + '%', background: color }"></div>
+        </div>
+      </div>
+    </div>
     <div v-if="data.jumlah_slot_splitter || data.jumlah_slot_splitter === 0" class="detail-row">
       <span class="label">Slot Splitter</span>
       <span class="value">{{ data.jumlah_slot_splitter }}</span>
@@ -45,6 +56,7 @@ import AddressWithMapButton from "@/components/AddressWithMapButton.vue";
 
 const props = defineProps({
   data: { type: Object, required: true },
+  color: { type: String, default: "var(--sb-accent)" },
 });
 
 const tipePemasanganLabel = computed(() => {
@@ -52,5 +64,11 @@ const tipePemasanganLabel = computed(() => {
   if (props.data.tipe_pemasangan === "tiang") return "Tiang";
   if (props.data.tipe_pemasangan === "dinding") return "Dinding";
   return "—";
+});
+
+const usagePercentage = computed(() => {
+  const capacity = props.data.kapasitas_port || 0;
+  const used = props.data.port_terpakai || 0;
+  return capacity > 0 ? Math.min(100, Math.round((used / capacity) * 100)) : 0;
 });
 </script>

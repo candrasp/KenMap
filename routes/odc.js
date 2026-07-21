@@ -9,7 +9,12 @@ const router = express.Router();
 // GET /api/odc - ambil semua ODC (boleh diakses tanpa login, untuk ditampilkan di peta)
 router.get("/", async (req, res, next) => {
   try {
-    const { rows } = await pool.query("SELECT * FROM odc ORDER BY id DESC");
+    const { rows } = await pool.query(`
+      SELECT odc.*,
+        (SELECT COUNT(*) FROM odp WHERE odp.odc_id = odc.id) AS port_terpakai
+      FROM odc
+      ORDER BY odc.id DESC
+    `);
     res.json(rows);
   } catch (err) {
     next(err);
@@ -19,7 +24,12 @@ router.get("/", async (req, res, next) => {
 // GET /api/odc/:id
 router.get("/:id", async (req, res, next) => {
   try {
-    const { rows } = await pool.query("SELECT * FROM odc WHERE id = $1", [req.params.id]);
+    const { rows } = await pool.query(`
+      SELECT odc.*,
+        (SELECT COUNT(*) FROM odp WHERE odp.odc_id = odc.id) AS port_terpakai
+      FROM odc
+      WHERE odc.id = $1
+    `, [req.params.id]);
     const row = rows[0];
     if (!row) return res.status(404).json({ error: "ODC tidak ditemukan." });
     res.json(row);

@@ -62,8 +62,39 @@
               </select>
             </div>
             <div class="input-group">
-              <label>Kapasitas Port</label>
-              <input v-model.number="formKapasitas" type="number" min="1" required />
+              <label>Rasio Splitter</label>
+              <select v-model="formRasioSplitter">
+                <option value="">Pilih Rasio Splitter</option>
+                <option value="1:2">1:2</option>
+                <option value="1:4">1:4</option>
+                <option value="1:8">1:8</option>
+                <option value="1:16">1:16</option>
+                <option value="1:32">1:32</option>
+                <option value="1:64">1:64</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-grid">
+            <div class="input-group">
+              <div style="display: flex; justify-content: space-between; align-items: center">
+                <label style="margin: 0">Kapasitas Port</label>
+                <label class="manual-toggle">
+                  <input type="checkbox" v-model="formKapasitasManual" />
+                  Atur manual
+                </label>
+              </div>
+              <input
+                v-model.number="formKapasitas"
+                type="number"
+                min="1"
+                required
+                :disabled="!formKapasitasManual"
+                :placeholder="!formKapasitasManual ? `Otomatis: ${kapasitasOtomatis}` : ''"
+              />
+              <span class="kapasitas-hint">
+                {{ !formKapasitasManual ? `Dihitung dari rasio ${formRasioSplitter || "-"}` : "" }}
+              </span>
             </div>
           </div>
 
@@ -194,7 +225,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useInfrastrukturStore } from "@/stores/infrastruktur";
 import { useAuthStore } from "@/stores/auth";
 import { useNotification } from "@/composables/useNotification";
@@ -215,10 +246,23 @@ const formOdcId = ref(null);
 const formAlamat = ref("");
 const formStatus = ref("aktif");
 const formTipePemasangan = ref("tiang");
+const formRasioSplitter = ref("1:8");
 const formKapasitas = ref(8);
+const formKapasitasManual = ref(true);
 const formCatatan = ref("");
 const errorMsg = ref("");
 const saving = ref(false);
+
+// Kapasitas teoretis ODP = output splitter tunggal, diambil dari rasio (mis. 1:8 -> 8)
+const kapasitasOtomatis = computed(() => {
+  return parseInt(formRasioSplitter.value?.split(":")[1], 10) || 0;
+});
+
+watch(formRasioSplitter, () => {
+  if (!formKapasitasManual.value) {
+    formKapasitas.value = kapasitasOtomatis.value;
+  }
+});
 
 // Delete states
 const isDeleteModalVisible = ref(false);
@@ -235,7 +279,9 @@ watch(
       formOdcId.value = d.odc_id || null;
       formAlamat.value = d.alamat || "";
       formTipePemasangan.value = d.tipe_pemasangan || "tiang";
+      formRasioSplitter.value = d.rasio_splitter || "1:8";
       formKapasitas.value = d.kapasitas_port || 8;
+      formKapasitasManual.value = true;
       formCatatan.value = d.catatan || "";
       errorMsg.value = "";
     }
@@ -257,6 +303,7 @@ async function saveChanges() {
     odc_id: formOdcId.value,
     alamat: formAlamat.value.trim() || null,
     tipe_pemasangan: formTipePemasangan.value,
+    rasio_splitter: formRasioSplitter.value || null,
     kapasitas_port: formKapasitas.value,
     catatan: formCatatan.value.trim() || null,
     lat: props.device.data.lat,
@@ -392,7 +439,9 @@ async function confirmDelete() {
   cursor: pointer;
   color: var(--sb-text-secondary);
   border-radius: 50%;
-  transition: all 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .modal-header .close-btn:hover {
@@ -439,6 +488,28 @@ async function confirmDelete() {
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
+}
+
+.manual-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--sb-text-secondary);
+  cursor: pointer;
+}
+
+.manual-toggle input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.kapasitas-hint {
+  display: block;
+  min-height: 14px;
+  font-size: 11px;
+  color: var(--sb-text-secondary);
 }
 
 .input-group input:focus,
@@ -492,7 +563,7 @@ async function confirmDelete() {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 
 .cancel-btn:hover {
@@ -508,7 +579,7 @@ async function confirmDelete() {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: opacity 0.2s;
 }
 
 .save-btn:hover:not(:disabled) {
@@ -532,7 +603,7 @@ async function confirmDelete() {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s;
 }
 
 .delete-btn:hover {
@@ -548,7 +619,7 @@ async function confirmDelete() {
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 
 .delete-confirm-btn:hover:not(:disabled) {
@@ -625,6 +696,7 @@ async function confirmDelete() {
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none !important;
+  display: none !important;
   margin: 0 !important;
 }
 

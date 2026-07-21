@@ -26,7 +26,7 @@
                 <li>Login terlebih dahulu</li>
                 <li>Buka peta dan arahkan ke lokasi yang diinginkan</li>
                 <li><strong>Double-click (klik 2 kali)</strong> pada lokasi di peta</li>
-                <li>Modal akan muncul dengan pilihan tipe pin (STO, OLT, ODC, ODP, Klien)</li>
+                <li>Modal akan muncul dengan pilihan tipe pin (STO, ODC, ODP, Klien)</li>
                 <li>Pilih tipe pin yang sesuai dengan kebutuhan Anda</li>
                 <li>Isi informasi yang diperlukan</li>
                 <li>Klik <strong>Simpan</strong></li>
@@ -82,7 +82,7 @@
                 <li>Buka peta di perangkat mobile Anda</li>
                 <li><strong>Tekan dan tahan (long-press)</strong> pada lokasi di peta</li>
                 <li>Modal untuk tambah pin akan muncul</li>
-                <li>Pilih tipe pin (STO, OLT, ODC, ODP, Klien)</li>
+                <li>Pilih tipe pin (STO, ODC, ODP, Klien)</li>
                 <li>Isi semua informasi yang diperlukan</li>
                 <li>Tap <strong>Simpan</strong></li>
               </ol>
@@ -96,8 +96,11 @@
               <div class="pin-type-item">
                 <strong>STO</strong> - Splice/Terminal Office (gedung sentral)
               </div>
-              <div class="pin-type-item">
-                <strong>OLT</strong> - Optical Line Terminal (sumber feeder)
+              <div class="pin-type-item pin-type-note">
+                <strong>OLT</strong> - Optical Line Terminal (sumber feeder).
+                <em
+                  >Bukan pin peta — ditambahkan lewat form edit STO, lihat penjelasan di bawah.</em
+                >
               </div>
               <div class="pin-type-item">
                 <strong>ODC</strong> - Optical Distribution Cabinet (lemari distribusi)
@@ -107,6 +110,216 @@
               </div>
               <div class="pin-type-item"><strong>Klien</strong> - Pelanggan FTTH</div>
             </div>
+          </div>
+
+          <!-- Bagian Struktur Jaringan (Hierarki) -->
+          <div class="panduan-section">
+            <h3>🌳 Struktur Jaringan</h3>
+            <p>
+              Setiap perangkat terhubung dalam hierarki berjenjang — satu perangkat di level atas
+              bisa menaungi banyak perangkat di level bawahnya:
+            </p>
+            <svg class="hierarki-svg" viewBox="0 0 680 160" role="img">
+              <title>Hierarki struktur jaringan KenMap</title>
+              <desc>
+                Diagram alur STO ke OLT ke ODC ke ODP ke Klien menunjukkan hierarki satu ke banyak
+              </desc>
+              <defs>
+                <marker
+                  id="panduan-arrow"
+                  viewBox="0 0 10 10"
+                  refX="8"
+                  refY="5"
+                  markerWidth="6"
+                  markerHeight="6"
+                  orient="auto-start-reverse"
+                >
+                  <path
+                    d="M2 1L8 5L2 9"
+                    fill="none"
+                    stroke="#3ecf8e"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </marker>
+              </defs>
+
+              <rect x="40" y="60" width="100" height="56" rx="8" class="node-infra" />
+              <text
+                x="90"
+                y="78"
+                text-anchor="middle"
+                dominant-baseline="central"
+                class="node-title"
+              >
+                STO
+              </text>
+              <text x="90" y="96" text-anchor="middle" dominant-baseline="central" class="node-sub">
+                Sentral
+              </text>
+
+              <line
+                x1="140"
+                y1="88"
+                x2="158"
+                y2="88"
+                class="node-arrow"
+                marker-end="url(#panduan-arrow)"
+              />
+
+              <rect x="160" y="60" width="100" height="56" rx="8" class="node-infra" />
+              <text
+                x="210"
+                y="78"
+                text-anchor="middle"
+                dominant-baseline="central"
+                class="node-title"
+              >
+                OLT
+              </text>
+              <text
+                x="210"
+                y="96"
+                text-anchor="middle"
+                dominant-baseline="central"
+                class="node-sub"
+              >
+                Feeder utama
+              </text>
+
+              <line
+                x1="260"
+                y1="88"
+                x2="278"
+                y2="88"
+                class="node-arrow"
+                marker-end="url(#panduan-arrow)"
+              />
+
+              <rect x="280" y="60" width="100" height="56" rx="8" class="node-infra" />
+              <text
+                x="330"
+                y="78"
+                text-anchor="middle"
+                dominant-baseline="central"
+                class="node-title"
+              >
+                ODC
+              </text>
+              <text
+                x="330"
+                y="96"
+                text-anchor="middle"
+                dominant-baseline="central"
+                class="node-sub"
+              >
+                Distribusi
+              </text>
+
+              <line
+                x1="380"
+                y1="88"
+                x2="398"
+                y2="88"
+                class="node-arrow"
+                marker-end="url(#panduan-arrow)"
+              />
+
+              <rect x="400" y="60" width="100" height="56" rx="8" class="node-infra" />
+              <text
+                x="450"
+                y="78"
+                text-anchor="middle"
+                dominant-baseline="central"
+                class="node-title"
+              >
+                ODP
+              </text>
+              <text
+                x="450"
+                y="96"
+                text-anchor="middle"
+                dominant-baseline="central"
+                class="node-sub"
+              >
+                Titik akhir
+              </text>
+
+              <line
+                x1="500"
+                y1="88"
+                x2="518"
+                y2="88"
+                class="node-arrow"
+                marker-end="url(#panduan-arrow)"
+              />
+
+              <rect x="520" y="60" width="100" height="56" rx="8" class="node-klien" />
+              <text
+                x="570"
+                y="78"
+                text-anchor="middle"
+                dominant-baseline="central"
+                class="node-title"
+              >
+                Klien
+              </text>
+              <text
+                x="570"
+                y="96"
+                text-anchor="middle"
+                dominant-baseline="central"
+                class="node-sub node-sub-klien"
+              >
+                Pelanggan
+              </text>
+            </svg>
+            <p class="hierarki-caption">
+              Satu STO bisa menaungi banyak OLT, satu OLT banyak ODC, dan seterusnya sampai ke
+              Klien. Saat menambah perangkat baru, pastikan Anda menghubungkannya ke perangkat induk
+              yang tepat di level atasnya.
+            </p>
+          </div>
+
+          <!-- Bagian Cara Menambah OLT -->
+          <div class="panduan-section">
+            <h3>➕ Cara Menambahkan OLT</h3>
+            <p>
+              Berbeda dari STO, ODC, ODP, dan Klien,
+              <strong>OLT tidak bisa ditambahkan langsung lewat klik di peta</strong>. OLT
+              ditambahkan dari dalam form edit STO, dan STO-nya harus sudah ada terlebih dahulu:
+            </p>
+            <div class="tutorial-item">
+              <ol>
+                <li>Tambahkan pin <strong>STO</strong> terlebih dahulu (kalau belum ada)</li>
+                <li>Klik pin STO tersebut di peta, lalu klik <strong>Edit</strong></li>
+                <li>
+                  Di dalam form edit STO, cari bagian <strong>"OLT Terhubung"</strong>, lalu klik
+                  tombol <strong>"+ Tambah OLT"</strong>
+                </li>
+                <li>Isi <strong>Kode OLT</strong> dan <strong>Nama OLT</strong></li>
+                <li>Klik <strong>"Buat OLT"</strong></li>
+              </ol>
+            </div>
+            <p class="hierarki-caption">
+              Karena OLT selalu terhubung ke satu STO, sebuah STO tidak bisa dihapus selama masih
+              ada OLT yang terhubung ke dalamnya — hapus atau pindahkan dulu OLT-nya sebelum
+              menghapus STO.
+            </p>
+          </div>
+
+          <!-- Bagian Fitur yang Akan Datang -->
+          <div class="panduan-section">
+            <h3>🚧 Segera Hadir</h3>
+            <p class="coming-soon-note">
+              <strong>Manajemen Kabel</strong> — menggambar dan mengelola jalur kabel (feeder,
+              distribusi, drop) langsung di peta.
+            </p>
+            <p class="coming-soon-note">
+              <strong>Upload Foto</strong> — melampirkan foto dokumentasi ke data STO, ODC, dan ODP.
+            </p>
+            <p>Kedua fitur ini sedang dalam pengembangan dan akan tersedia di versi selanjutnya.</p>
           </div>
 
           <!-- Bagian Edit & Lihat Detail -->
@@ -127,12 +340,24 @@
             <h3>🛠️ Fitur Tambahan</h3>
             <ul>
               <li>
-                <strong>Pencarian Koordinat:</strong> Gunakan search bar untuk mencari lokasi
-                berdasarkan koordinat
+                <strong>Pencarian:</strong> Gunakan search bar untuk mencari lokasi berdasarkan
+                koordinat, atau cari langsung berdasarkan nama/kode <strong>ODC</strong>,
+                <strong>ODP</strong>, atau <strong>Klien</strong>. Peta akan otomatis berpindah ke
+                lokasi hasil pencarian.
               </li>
               <li>
-                <strong>Ukur Jarak:</strong> Gunakan tool pengukur untuk menghitung jarak antar
-                lokasi
+                <strong>Ukur Jarak:</strong>
+                <ol>
+                  <li>Klik ikon pengukur, lalu klik pada peta untuk menentukan titik awal (A)</li>
+                  <li>
+                    Klik titik berikutnya (B, C, dan seterusnya) untuk membentuk garis — jarak total
+                    akan otomatis dihitung dan ditampilkan
+                  </li>
+                  <li>
+                    Salah klik titik? Tekan <strong>Ctrl+Z</strong> (atau tombol undo) untuk
+                    menghapus titik terakhir yang ditambahkan
+                  </li>
+                </ol>
               </li>
               <li>
                 <strong>Filter Layer:</strong> Gunakan sidebar untuk menampilkan/menyembunyikan
@@ -149,6 +374,76 @@
             </ul>
           </div>
 
+          <!-- Bagian Instal Aplikasi (PWA) -->
+          <div class="panduan-section">
+            <h3>📲 Instal Aplikasi (PWA)</h3>
+            <p>
+              KenMap bisa diinstal sebagai aplikasi di komputer maupun HP, seperti aplikasi native —
+              tanpa perlu App Store/Play Store. Setelah diinstal, aplikasi punya ikon sendiri dan
+              bisa dibuka tanpa membuka browser terlebih dahulu.
+            </p>
+
+            <div class="tutorial-item">
+              <h4>💻 Cara Install (Komputer — Chrome/Edge)</h4>
+              <ol>
+                <li>Buka KenMap di browser</li>
+                <li>
+                  Klik ikon <strong>install</strong> (biasanya berbentuk layar dengan panah ke
+                  bawah) di ujung kanan address bar
+                </li>
+                <li>
+                  Kalau ikon tidak muncul, buka menu titik tiga (⋮) → cari opsi "Install KenMap…"
+                </li>
+                <li>Klik <strong>Install</strong> pada dialog konfirmasi</li>
+              </ol>
+            </div>
+
+            <div class="tutorial-item">
+              <h4>📱 Cara Install (Android — Chrome)</h4>
+              <ol>
+                <li>Buka KenMap di Chrome</li>
+                <li>Tap menu titik tiga (⋮) di kanan atas</li>
+                <li>
+                  Pilih <strong>"Install aplikasi"</strong> atau
+                  <strong>"Tambahkan ke layar utama"</strong>
+                </li>
+                <li>Tap <strong>Install</strong> pada dialog konfirmasi</li>
+              </ol>
+            </div>
+
+            <div class="tutorial-item">
+              <h4>📱 Cara Install (iPhone/iPad — Safari)</h4>
+              <ol>
+                <li>Buka KenMap di Safari (harus Safari, browser lain tidak bisa)</li>
+                <li>Tap ikon <strong>Share/Bagikan</strong> (kotak dengan panah ke atas)</li>
+                <li>Pilih <strong>"Tambah ke Layar Utama"</strong></li>
+                <li>Tap <strong>Tambah</strong> di pojok kanan atas</li>
+              </ol>
+            </div>
+
+            <p class="hierarki-caption">
+              Catatan: tombol install hanya muncul kalau situs diakses lewat
+              <strong>HTTPS</strong> (atau <code>localhost</code>). Kalau aplikasi diakses lewat
+              alamat HTTP biasa (misalnya IP lokal tanpa HTTPS), tombol install tidak akan tersedia.
+            </p>
+
+            <h4 class="pwa-subheading">🔄 Cara Update Kalau Ada Fitur Baru</h4>
+            <p>
+              KenMap otomatis mengecek pembaruan setiap kali aplikasi dibuka. Kalau ada versi baru:
+            </p>
+            <ul>
+              <li>Pembaruan akan terunduh otomatis di latar belakang saat Anda memakai aplikasi</li>
+              <li>
+                Tutup aplikasi sepenuhnya lalu buka lagi (atau refresh halaman) untuk memuat versi
+                terbaru
+              </li>
+              <li>
+                Kalau setelah refresh masih terasa ada yang aneh/fitur baru belum muncul, coba tutup
+                aplikasi dari task switcher (bukan cuma minimize), lalu buka ulang
+              </li>
+            </ul>
+          </div>
+
           <!-- Bagian Tips -->
           <div class="panduan-section">
             <h3>💡 Tips & Trik</h3>
@@ -156,7 +451,6 @@
               <li>Selalu login sebelum menambah atau mengubah data</li>
               <li>Gunakan koordinat yang akurat untuk penempatan pin</li>
               <li>Lengkapi semua informasi wajib sebelum menyimpan</li>
-              <li>Gunakan foto/screenshot untuk dokumentasi perangkat</li>
               <li>Periksa kembali data sebelum menyimpan untuk menghindari kesalahan</li>
             </ul>
           </div>
@@ -322,6 +616,89 @@ function onClose() {
   border-radius: 4px;
   color: #a1a1aa;
   font-size: 13px;
+}
+
+.pin-type-note em {
+  display: block;
+  font-style: normal;
+  color: #e0a458;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.pwa-subheading {
+  color: #ededed;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 20px 0 8px 0;
+}
+
+code {
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 12px;
+  color: #3ecf8e;
+  font-family: monospace;
+}
+
+.hierarki-svg {
+  width: 100%;
+  height: auto;
+  margin: 8px 0;
+}
+
+.node-infra {
+  fill: #1b3a30;
+  stroke: #3ecf8e;
+  stroke-width: 1;
+}
+
+.node-klien {
+  fill: #3a2416;
+  stroke: #e0a458;
+  stroke-width: 1;
+}
+
+.node-title {
+  fill: #ededed;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.node-sub {
+  fill: #a1a1aa;
+  font-size: 12px;
+}
+
+.node-sub-klien {
+  fill: #d8b78a;
+}
+
+.node-arrow {
+  stroke: #3ecf8e;
+  stroke-width: 1.5;
+}
+
+.hierarki-caption {
+  font-size: 13px;
+  color: #a1a1aa;
+  margin-top: 8px;
+}
+
+.coming-soon-note {
+  background: #27272a;
+  border-left: 3px solid #e0a458;
+  padding: 12px 16px;
+  border-radius: 6px;
+  color: #a1a1aa;
+  font-size: 13px;
+  margin: 0 0 10px 0;
+}
+
+.coming-soon-note strong {
+  color: #e0a458;
 }
 
 .panduan-footer {

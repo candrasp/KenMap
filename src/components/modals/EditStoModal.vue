@@ -514,7 +514,7 @@ async function confirmDelete() {
   cursor: pointer;
   color: var(--sb-text-secondary);
   border-radius: 50%;
-  transition: all 0.2s;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .modal-header .close-btn:hover {
@@ -614,7 +614,7 @@ async function confirmDelete() {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 
 .cancel-btn:hover {
@@ -630,7 +630,7 @@ async function confirmDelete() {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: opacity 0.2s;
 }
 
 .save-btn:hover:not(:disabled) {
@@ -654,7 +654,7 @@ async function confirmDelete() {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .delete-btn:hover {
@@ -670,7 +670,7 @@ async function confirmDelete() {
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 
 .delete-confirm-btn:hover:not(:disabled) {
@@ -757,7 +757,7 @@ async function confirmDelete() {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: opacity 0.2s;
 }
 
 .add-olt-btn:hover {
@@ -766,5 +766,17 @@ async function confirmDelete() {
 
 .add-olt-btn:active {
   transform: scale(0.98);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none !important;
+  display: none !important;
+  margin: 0 !important;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield !important;
+  appearance: none !important;
 }
 </style>

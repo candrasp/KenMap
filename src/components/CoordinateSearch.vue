@@ -17,7 +17,7 @@
     <input
       v-model="coordinateInput"
       type="text"
-      placeholder="Cari koordinat, ODP, klien…"
+      placeholder="Koordinat, ODC, ODP, Klien"
       @keydown.enter.prevent="handleEnterKey"
       @focus="onFocus"
       @blur="onBlur"
@@ -67,13 +67,33 @@
 
         <!-- Results -->
         <template v-else-if="results.length > 0">
+          <!-- Category: ODC -->
+          <div v-if="odcResults.length > 0" class="dropdown-category">ODC</div>
+          <button
+            v-for="(item, i) in odcResults"
+            :key="'odc-' + item.id"
+            class="dropdown-item"
+            :class="{ highlighted: highlightIndex === i }"
+            @mousedown.prevent="selectItem(item)"
+          >
+            <span class="item-icon odc">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+                <line x1="15" y1="3" x2="15" y2="21" />
+              </svg>
+            </span>
+            <span class="item-name">{{ item.nama }}</span>
+            <span class="item-coords">{{ item.lat?.toFixed(4) }}, {{ item.lng?.toFixed(4) }}</span>
+          </button>
+
           <!-- Category: ODP -->
           <div v-if="odpResults.length > 0" class="dropdown-category">ODP</div>
           <button
             v-for="(item, i) in odpResults"
             :key="'odp-' + item.id"
             class="dropdown-item"
-            :class="{ highlighted: highlightIndex === i }"
+            :class="{ highlighted: highlightIndex === odcResults.length + i }"
             @mousedown.prevent="selectItem(item)"
           >
             <span class="item-icon odp">
@@ -91,7 +111,7 @@
             v-for="(item, i) in klienResults"
             :key="'klien-' + item.id"
             class="dropdown-item klien-item"
-            :class="{ highlighted: highlightIndex === odpResults.length + i }"
+            :class="{ highlighted: highlightIndex === odcResults.length + odpResults.length + i }"
             @mousedown.prevent="selectItem(item)"
           >
             <span class="item-icon klien" :style="{ color: statusColor(item.status) }">
@@ -153,6 +173,7 @@ let debounceTimer = null;
 
 // ---- Computed ----
 const odpResults = computed(() => results.value.filter((r) => r._type === "odp"));
+const odcResults = computed(() => results.value.filter((r) => r._type === "odc"));
 const klienResults = computed(() => results.value.filter((r) => r._type === "klien"));
 
 // ---- Helpers ----
@@ -205,6 +226,11 @@ function onInput() {
   debounceTimer = setTimeout(() => {
     const lower = q.toLowerCase();
 
+    const matchedOdc = infraStore.odcList
+      .filter((o) => o.nama?.toLowerCase().includes(lower) && o.lat && o.lng)
+      .slice(0, 5)
+      .map((o) => ({ ...o, _type: "odc" }));
+
     const matchedOdp = infraStore.odpList
       .filter((o) => o.nama?.toLowerCase().includes(lower) && o.lat && o.lng)
       .slice(0, 5)
@@ -215,7 +241,7 @@ function onInput() {
       .slice(0, 5)
       .map((k) => ({ ...k, _type: "klien" }));
 
-    results.value = [...matchedOdp, ...matchedKlien];
+    results.value = [...matchedOdc, ...matchedOdp, ...matchedKlien];
     isSearching.value = false;
   }, 250);
 }
@@ -237,7 +263,6 @@ function handleEnterKey() {
 
 // ---- Coordinate search ----
 function search() {
-
   const input = coordinateInput.value.trim();
   if (!input) return;
 
@@ -319,7 +344,9 @@ function selectItem(item) {
   }
 
   // Highlight on the store's detail panel
-  if (item._type === "odp") {
+  if (item._type === "odc") {
+    infraStore.setSelectedDevice({ type: "odc", data: item });
+  } else if (item._type === "odp") {
     infraStore.setSelectedDevice({ type: "odp", data: item });
   } else if (item._type === "klien") {
     infraStore.setSelectedDevice({ type: "klien", data: item });
@@ -530,6 +557,9 @@ onUnmounted(() => document.removeEventListener("mousedown", handleClickOutside))
 
 .item-icon.odp {
   color: #3b82f6;
+}
+.item-icon.odc {
+  color: #8b5cf6;
 }
 .item-icon.klien {
   color: #10b981;

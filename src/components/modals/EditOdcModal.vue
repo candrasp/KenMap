@@ -50,12 +50,8 @@
             </div>
           </div>
 
-          <!-- Baris 3: Kapasitas Port | Tipe Pemasangan -->
+          <!-- Baris 3: Tipe Pemasangan | OLT Sumber Feeder -->
           <div class="form-row-grid">
-            <div class="input-group">
-              <label>Kapasitas Port</label>
-              <input v-model.number="formKapasitas" type="number" min="0" required />
-            </div>
             <div class="input-group">
               <label>Tipe Pemasangan</label>
               <select v-model="formTipePemasangan">
@@ -64,18 +60,7 @@
                 <option value="dinding">Dinding</option>
               </select>
             </div>
-          </div>
 
-          <div class="form-row-grid" v-if="formTipePemasangan === 'tiang'">
-            <div class="input-group">
-              <label>Nomor Tiang</label>
-              <input v-model="formNomorTiang" type="text" placeholder="TG-001" />
-            </div>
-            <div style="display: none"></div>
-          </div>
-
-          <!-- Baris 4: OLT Sumber Feeder | Slot Splitter -->
-          <div class="form-row-grid">
             <div class="input-group">
               <label>OLT Sumber Feeder</label>
               <select v-model="formOltId" :disabled="loadingOlt">
@@ -85,21 +70,60 @@
                 </option>
               </select>
             </div>
-            <div class="input-group">
-              <label>Jumlah Slot Splitter</label>
-              <input v-model.number="formJumlahSlotSplitter" type="number" min="0" />
-            </div>
           </div>
 
-          <!-- Baris 5: Rasio Splitter | Core Feeder -->
+          <!-- Baris 4: Rasio Splitter | Core Feeder -->
           <div class="form-row-grid">
-            <div class="input-group">
-              <label>Rasio Splitter</label>
-              <input v-model="formRasioSplitter" type="text" placeholder="1:8" />
-            </div>
             <div class="input-group">
               <label>Jumlah Core Feeder</label>
               <input v-model.number="formJumlahCoreFeeder" type="number" min="0" />
+            </div>
+            <div class="input-group">
+              <label>Rasio Splitter</label>
+              <select v-model="formRasioSplitter">
+                <option value="">Pilih Rasio Splitter</option>
+                <option value="1:4">1:4</option>
+                <option value="1:8">1:8</option>
+                <option value="1:16">1:16</option>
+                <option value="1:32">1:32</option>
+                <option value="1:64">1:64</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Baris 5: Jumlah Slot Splitter | Kapasitas Port -->
+          <div class="form-row-grid">
+            <div class="input-group">
+              <label>Jumlah Slot Splitter</label>
+              <select v-model.number="formJumlahSlotSplitter">
+                <option :value="0">Pilih jumlah slot</option>
+                <option v-for="opt in slotOptions" :key="opt" :value="opt">{{ opt }} slot</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <div style="display: flex; justify-content: space-between; align-items: center">
+                <label style="margin: 0">Kapasitas Port</label>
+                <label class="manual-toggle">
+                  <input type="checkbox" v-model="formKapasitasManual" />
+                  Atur manual
+                </label>
+              </div>
+              <input
+                v-model.number="formKapasitas"
+                type="number"
+                min="0"
+                required
+                :disabled="!formKapasitasManual"
+                :placeholder="!formKapasitasManual ? `Otomatis: ${kapasitasOtomatis}` : ''"
+              />
+              <span class="kapasitas-hint">
+                {{
+                  !formKapasitasManual
+                    ? `Dihitung dari ${formJumlahSlotSplitter || 0} slot × rasio ${formRasioSplitter || "-"}`
+                    : ""
+                }}
+              </span>
             </div>
           </div>
 
@@ -231,7 +255,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useInfrastrukturStore } from "@/stores/infrastruktur";
 import { useAuthStore } from "@/stores/auth";
 import { useNotification } from "@/composables/useNotification";
@@ -259,11 +283,34 @@ const formJumlahSlotSplitter = ref(0);
 const formRasioSplitter = ref("");
 const formJumlahCoreFeeder = ref(null);
 const formStatus = ref("planning");
+const formKapasitasManual = ref(true);
 const errorMsg = ref("");
 const saving = ref(false);
 
 const oltList = ref([]);
 const loadingOlt = ref(false);
+
+// Opsi jumlah slot splitter mengikuti kapasitas fisik cabinet yang lazim per tipe pemasangan
+const slotOptionsByTipe = {
+  tiang: [2, 4, 6],
+  tanam: [8, 12, 16, 24],
+  dinding: [4, 6, 8, 12],
+};
+const slotOptions = computed(
+  () => slotOptionsByTipe[formTipePemasangan.value] || [2, 4, 6, 8, 12, 16, 24],
+);
+
+// Kapasitas teoretis = jumlah slot terisi splitter x output per splitter (dari rasio, mis. 1:8 -> 8)
+const kapasitasOtomatis = computed(() => {
+  const outputPerSplitter = parseInt(formRasioSplitter.value?.split(":")[1], 10) || 0;
+  return (formJumlahSlotSplitter.value || 0) * outputPerSplitter;
+});
+
+watch([formJumlahSlotSplitter, formRasioSplitter], () => {
+  if (!formKapasitasManual.value) {
+    formKapasitas.value = kapasitasOtomatis.value;
+  }
+});
 
 // Delete states
 const isDeleteModalVisible = ref(false);
@@ -299,6 +346,7 @@ watch(
       formRasioSplitter.value = d.rasio_splitter || "";
       formJumlahCoreFeeder.value = d.jumlah_core_feeder ?? null;
       formStatus.value = d.status || "planning";
+      formKapasitasManual.value = true;
       errorMsg.value = "";
       loadOltList();
     }
@@ -460,7 +508,7 @@ async function confirmDelete() {
   cursor: pointer;
   color: var(--sb-text-secondary);
   border-radius: 50%;
-  transition: all 0.2s;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .modal-header .close-btn:hover {
@@ -507,6 +555,28 @@ async function confirmDelete() {
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
+}
+
+.manual-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--sb-text-secondary);
+  cursor: pointer;
+}
+
+.manual-toggle input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.kapasitas-hint {
+  display: block;
+  min-height: 14px;
+  font-size: 11px;
+  color: var(--sb-text-secondary);
 }
 
 .input-group input:focus,
@@ -560,7 +630,7 @@ async function confirmDelete() {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 
 .cancel-btn:hover {
@@ -576,7 +646,7 @@ async function confirmDelete() {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: opacity 0.2s;
 }
 
 .save-btn:hover:not(:disabled) {
@@ -600,7 +670,7 @@ async function confirmDelete() {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .delete-btn:hover {
@@ -616,7 +686,7 @@ async function confirmDelete() {
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 
 .delete-confirm-btn:hover:not(:disabled) {
@@ -693,6 +763,7 @@ async function confirmDelete() {
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none !important;
+  display: none !important;
   margin: 0 !important;
 }
 

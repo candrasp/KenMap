@@ -24,6 +24,15 @@ const HOST = "0.0.0.0";
 
 app.use(express.json());
 
+// Wajib set SESSION_SECRET lewat env var - tidak ada fallback hardcoded,
+// supaya tidak ada risiko secret bocor lewat source code (repo ini publik).
+if (!process.env.SESSION_SECRET) {
+  console.error(
+    "[fatal] SESSION_SECRET belum di-set di .env. Generate dengan: openssl rand -base64 32",
+  );
+  process.exit(1);
+}
+
 // Production: serve hasil build Vite dari folder dist/
 // Development: frontend dijalankan via `npm run dev:frontend` di port 5173
 if (process.env.NODE_ENV === "production") {
@@ -31,6 +40,10 @@ if (process.env.NODE_ENV === "production") {
 } else {
   app.use(express.static("public"));
 }
+
+// Kalau app berjalan di belakang reverse proxy (nginx, Docker, load balancer, dll),
+// trust proxy wajib di-set supaya Express tahu koneksi asli HTTPS -> cookie `secure` bisa berfungsi.
+app.set("trust proxy", 1);
 
 // Session disimpan di Postgres (tabel 'session', dibuat otomatis oleh
 // connect-pg-simple kalau createTableIfMissing: true) - jadi login tidak
@@ -42,10 +55,15 @@ app.use(
       tableName: "session",
       createTableIfMissing: true,
     }),
-    secret: process.env.SESSION_SECRET || "VFIsFKQCw1JDKsoG7DlT2vJJggYM1PurdoAG2rqn4i4=",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 8 }, // sesi login bertahan 8 jam
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 8, // sesi login bertahan 8 jam
+      secure: process.env.NODE_ENV === "production", // cookie hanya dikirim lewat HTTPS di produksi
+      httpOnly: true, // cookie tidak bisa diakses lewat JS di browser (proteksi XSS)
+      sameSite: "lax", // proteksi dasar terhadap CSRF
+    },
   }),
 );
 
