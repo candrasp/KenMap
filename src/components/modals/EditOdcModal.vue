@@ -283,7 +283,7 @@ const formJumlahSlotSplitter = ref(0);
 const formRasioSplitter = ref("");
 const formJumlahCoreFeeder = ref(null);
 const formStatus = ref("planning");
-const formKapasitasManual = ref(true);
+const formKapasitasManual = ref(false);
 const errorMsg = ref("");
 const saving = ref(false);
 
@@ -346,7 +346,14 @@ watch(
       formRasioSplitter.value = d.rasio_splitter || "";
       formJumlahCoreFeeder.value = d.jumlah_core_feeder ?? null;
       formStatus.value = d.status || "planning";
-      formKapasitasManual.value = true;
+      // Checkbox "Atur manual" hanya dicentang kalau kapasitas_port yang tersimpan
+      // memang berbeda dari hasil hitung otomatis (slot x rasio) — bukan default
+      // saat modal dibuka, supaya pin yang baru dipasang tidak langsung tercentang.
+      {
+        const outputPerSplitter = parseInt((d.rasio_splitter || "").split(":")[1], 10) || 0;
+        const autoKapasitas = (d.jumlah_slot_splitter || 0) * outputPerSplitter;
+        formKapasitasManual.value = (d.kapasitas_port || 0) !== autoKapasitas;
+      }
       errorMsg.value = "";
       loadOltList();
     }
@@ -508,7 +515,9 @@ async function confirmDelete() {
   cursor: pointer;
   color: var(--sb-text-secondary);
   border-radius: 50%;
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .modal-header .close-btn:hover {

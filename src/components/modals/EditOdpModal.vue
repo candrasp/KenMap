@@ -248,7 +248,7 @@ const formStatus = ref("aktif");
 const formTipePemasangan = ref("tiang");
 const formRasioSplitter = ref("1:8");
 const formKapasitas = ref(8);
-const formKapasitasManual = ref(true);
+const formKapasitasManual = ref(false);
 const formCatatan = ref("");
 const errorMsg = ref("");
 const saving = ref(false);
@@ -281,7 +281,14 @@ watch(
       formTipePemasangan.value = d.tipe_pemasangan || "tiang";
       formRasioSplitter.value = d.rasio_splitter || "1:8";
       formKapasitas.value = d.kapasitas_port || 8;
-      formKapasitasManual.value = true;
+      // Checkbox "Atur manual" hanya dicentang kalau kapasitas_port yang tersimpan
+      // memang berbeda dari hasil hitung otomatis (output rasio splitter) — bukan
+      // default saat modal dibuka, supaya pin yang baru dipasang tidak langsung tercentang.
+      {
+        const rasio = d.rasio_splitter || "1:8";
+        const autoKapasitas = parseInt(rasio.split(":")[1], 10) || 0;
+        formKapasitasManual.value = (d.kapasitas_port || 8) !== autoKapasitas;
+      }
       formCatatan.value = d.catatan || "";
       errorMsg.value = "";
     }
